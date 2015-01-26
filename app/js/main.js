@@ -6,24 +6,38 @@ import _ from 'lib/lodash';
 
 console.log('HELLO WORLD' + dep());
 
-var playarea = $('#playarea');
-console.log(playarea.html())
+var playareaElement = $('#playarea')[0];
+console.log(playarea)
 
 var width = 8,
   height = 6;
 
+var grid = hex.grid(playareaElement, { type: "hexagonal_horizontal" }),
+  tiles = {};
+
+grid.tileWidth = 58;
+grid.tileHeight = 58;
+console.log(grid)
+
 _.times(height, function (y) {
-  var hexRowHtml = '<div class="hex-row">';
-
   _.times(width, function (x) {
-    var even = x % 2 === 0 ? ' even' : '';
-    hexRowHtml += '<div class="hex' + even + '">';
-    hexRowHtml += '<div class="left"></div><div class="middle"></div><div class="right"></div>';
-    hexRowHtml += '</div>';
+    var $tile = $(`<div class="tile">${hex.key(x,y)}</div>`),
+      inv = grid.screenpos(-x, y);
+
+    $tile.css({
+      left: inv.x,
+      top: inv.y
+    });
+    $tile.appendTo(grid.root);
+    tiles[hex.key(x, y)] = $tile;
   });
+});
 
-  hexRowHtml += '</div>';
+grid.reorient(150, 0);
 
-  $('#playarea').append(hexRowHtml);
-  console.log(y)
+grid.addEvent("tileclick", function(e, x, y) {
+  if (-x < 0 || -x >= width || y < 0 || y >= height) {
+    return;
+  }
+  console.log([-x, y], e.type);
 });

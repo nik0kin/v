@@ -19,7 +19,7 @@ var app = 'app',
  */
 appHtml = pickFiles(app, {
   srcDir  : '/',
-  files   : ['index.html'],
+  files   : ['**.html'],
   destDir : '/'
 });
 
@@ -28,6 +28,7 @@ appHtml = pickFiles(app, {
  */
 var lodash,
   jquery,
+  hexlib,
   bootstrapCss,
   requirejs;
 
@@ -40,6 +41,15 @@ lodash = pickFiles('bower_components', {
 jquery = pickFiles('bower_components', {
   srcDir: '/jquery/dist',
   files: ['jquery.js'],
+  destDir: '/lib'
+});
+
+hexlib = pickFiles('app', {
+//hexlib = pickFiles('bower_components', {
+//  srcDir: '/hexlib/dist',
+//  files: ['hex.js'],
+  srcDir: '/',
+  files: ['hex.min.js'],
   destDir: '/lib'
 });
 
@@ -60,7 +70,13 @@ requirejs = pickFiles('bower_components', {
   destDir: '/lib'
 });
 
-appLib = mergeTrees([lodash, jquery, bootstrapCss, requirejs]);
+appLib = mergeTrees([
+  lodash,
+  jquery,
+  hexlib,
+  bootstrapCss,
+  requirejs
+]);
 
 /**
  * concatenate and compress all of our JavaScript files in 
@@ -90,13 +106,13 @@ appJs = esTranspiler(appJs, {
 //  });
 //}
 
-//appImg = pickFiles(app, {
-//  srcDir  : '/',
-//  files   : ['**/*.png','**/*.jpg', '**/*.ico'],
-//  destDir : '/'
-//});
+appImg = pickFiles(app, {
+  srcDir  : '/img',
+  files   : ['**/*.png'],
+  destDir : '/img'
+});
 
 appCss = compileLess(app, 'styles/app.less', '/app.css');
 
 // merge HTML, JavaScript and CSS trees into a single tree and export it
-module.exports = mergeTrees([appHtml, appLib, appJs, appCss/*, appImg*/]);
+module.exports = mergeTrees([appHtml, appLib, appJs, appCss, appImg]);
