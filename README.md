@@ -1,2 +1,6 @@
 # v
-FUN
+
+Playing with es6, hexgrids
+
+
+```broccoli serve```
