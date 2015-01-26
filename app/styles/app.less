@@ -6,23 +6,23 @@ div .border{
 }
 
 #turnsummary {
-	height: 20%;
+	height: 15%;
 }
 
 #header {
-	height: 20%;
+	height: 15%;
 }
 
 #unitlist {
-	height: 40%;
+	height: 45%;
 }
 
-#selectedspace {
+#selectedSpaceInfo {
 	height: 40%;
 }
 
 #boundingplayarea {
-	height: 80%;
+	height: 85%;
 	overflow-y: auto;
 	overflow-x: scroll;
 }
@@ -37,10 +37,23 @@ div .border{
 .tile {
   background-image: url("../img/kenney/tileDirt_tile.png");
   background-position: 0px 0px;
-  padding-left:20px;
-  padding-top:20px;
+
+  font-size: x-small;
+  padding-left:25px;
+  padding-top:10px;
 
   height: 89px;
   width: 65px;
   position: absolute;
 }
+
+.selector {
+  background-image: url("../img/selector.png");
+  background-position: 0px 0px;
+
+  height: 89px;
+  width: 65px;
+  position: absolute;
+}
+
+@import "units.less";
