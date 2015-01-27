@@ -29,6 +29,7 @@ appHtml = pickFiles(app, {
 var lodash,
   jquery,
   hexlib,
+  mule,
   bootstrapCss,
   requirejs;
 
@@ -53,6 +54,19 @@ hexlib = pickFiles('app', {
   destDir: '/lib'
 });
 
+mule = pickFiles('bower_components', {
+  srcDir: '/mule-sdk-js/src',
+  files: ['**/*.js'],
+  destDir: '/lib/mule-sdk-js'
+});
+
+// minified
+//mule = pickFiles('bower_components', {
+//  srcDir: '/mule-js-sdk',
+//  files: ['mule-sdk.js'],
+//  destDir: '/lib'
+//});
+
 bootstrapCss = pickFiles('bower_components', {
   srcDir: '/bootstrap/dist/css',
   files: [
@@ -74,6 +88,7 @@ appLib = mergeTrees([
   lodash,
   jquery,
   hexlib,
+  mule,
   bootstrapCss,
   requirejs
 ]);
