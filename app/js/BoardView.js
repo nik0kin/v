@@ -1,23 +1,28 @@
+// BoardView.js
+//   - hexlib wrapper
+
 import _ from 'lib/lodash';
+
+import { hexlibToAxial, axialToHexlib, posTohexkey as toKey } from 'js/hexUtils';
 
 var tileWidth = 58,
   tileHeight = 58
 
+var toCssPos = function (pos) {
+  return {
+    left: pos.x,
+    top: pos.y
+  };
+};
 
 class BoardView {
   constructor(params) {
     this.tiles = {};
     this.units = {};
     this.size = params.size;
-    this.createBoard(params.playareaElement, params.type, params.size, params.clickSpaceCallback);
+    this.createBoard(params.playareaElement, params.type,
+        params.boardSpaces, params.size, params.clickSpaceCallback);
     this.initSelector();
-
-    //testing
-    this.placeUnit(0, 0, 'viking');
-    this.placeUnit(0, 0, 'shieldMaiden');
-    this.placeUnit(0, 0, 'viking');
-    this.placeUnit(2, 2, 'shieldMaiden');
-    this.placeUnit(5, 4, 'viking');
   }
 
   getHexKey(x, y) {
@@ -25,10 +30,11 @@ class BoardView {
   }
 
   getHexPosition(x, y) {
-    return this.hexGrid.screenpos(-x, y);
+    var hexlibPos = axialToHexlib(x, y);
+    return this.hexGrid.screenpos(hexlibPos.x, hexlibPos.y);
   }
 
-  createBoard($playareaElement, type='horizontal', size, clickSpaceCallback) {
+  createBoard($playareaElement, type='horizontal', boardSpaces, size, clickSpaceCallback) {
 
     this.hexGrid = hex.grid($playareaElement, {
       type: "hexagonal_horizontal"
@@ -42,30 +48,36 @@ class BoardView {
     grid.tileWidth = tileWidth;
     grid.tileHeight = tileHeight;
 
-    _.times(size.height, function (y) {
-      _.times(size.width, function (x) {
-        var key = that.getHexKey(x, y),
+    _.each(boardSpaces, function (bs) {
+      var key = that.getHexKey(bs.x, bs.y),
           $tile = $(`<div class="tile">${key}</div>`),
-          pos = that.getHexPosition(x, y);
+          pos = that.getHexPosition(bs.x, bs.y);
 
-        $tile.css({
-          left: pos.x,
-          top: pos.y
-        });
-        $tile.appendTo(grid.root);
-        tiles[key] = $tile;
-        units[key] = [];
-      });
+      $tile.css(toCssPos(pos));
+      $tile.appendTo(grid.root);
+      tiles[key] = $tile;
+      units[key] = [];
     });
 
     grid.reorient(150, 0);
 
     grid.addEvent("tileclick", function(e, x, y) {
-      if (-x < 0 || -x >= size.width || y < 0 || y >= size.height) {
+      var axialPos = hexlibToAxial(x, y);
+      if (axialPos.x < 0 || axialPos.x >= size.width
+          || axialPos.y < 0 || axialPos.y >= size.height) {
         return;
       }
-      x = -x === -0 ? 0 : -x; //javascript lol
-      clickSpaceCallback(x, y);
+      clickSpaceCallback(axialPos);
+    });
+
+    grid.addEvent("tileover", function(e, x, y) {
+      var axialPos = hexlibToAxial(x, y);
+      that.onTileOver(axialPos);
+    });
+
+    grid.addEvent("tileout", function(e, x, y) {
+      var axialPos = hexlibToAxial(x, y);
+      that.onTileOut(axialPos);
     });
   }
 
@@ -74,9 +86,9 @@ class BoardView {
       add;
 
     add = {
-      0: {x: 4, y: 0},
-      1: {x: 22, y: 15},
-      2: {x: 42, y: 0}
+      0: {x: 4, y: 10},
+      1: {x: 22, y: 25},
+      2: {x: 42, y: 10}
     }[spotsTaken];
 
     return {x: pos.x + add.x, y: pos.y + add.y};
@@ -87,27 +99,60 @@ class BoardView {
       key = this.getHexKey(x,y),
       pos = this.getUnitPosition(x, y, this.units[key].length);
 
-    $newUnit.css({
-      left: pos.x,
-      top: pos.y
-    });
+    $newUnit.css(toCssPos(pos));
 
     $newUnit.appendTo(this.hexGrid.root);
     this.units[key].push($newUnit);
+  }
+
+  moveUnit(fromX, fromY, toX, toY, classType) {
+    // for now move any unit that is the same classType
+    var unitsOnFromSpace = this.units[fromX+','+fromY],
+        unitIndex,
+        unitsOnToSpace = this.units[toX+','+toY],
+        newPos = this.getUnitPosition(toX, toY, unitsOnToSpace.length);
+    _.each(unitsOnFromSpace, function ($unit, index) {
+      if ($unit.attr('class') === classType) {
+        unitIndex = index;
+      }
+    });
+
+    if (_.isUndefined(unitIndex)) {
+      throw 'cant move unit from a space where the unit does not exist.';
+    }
+
+    var $unit;
+
+    // shifting around sprites, so nothing looks funny when a unit moves
+    if (unitsOnFromSpace.length > 1 && unitsOnFromSpace.length-1 !== unitIndex) {
+      var $unitReplacingSpot = unitsOnFromSpace.pop();
+      $unit = unitsOnFromSpace.splice(unitIndex, 1, $unitReplacingSpot)[0];
+      $unitReplacingSpot.css({
+        left: $unit.css('left'),
+        top: $unit.css('top')
+      });
+    } else {
+      $unit = unitsOnFromSpace.splice(unitIndex, 1)[0];
+    }
+
+    $unit.css(toCssPos(newPos));
+    unitsOnToSpace.push($unit);
   }
 
   initSelector() {
     this.$selector = $('<div class="selector"></div>')
       .hide();
     this.hexGrid.root.appendChild(this.$selector[0]);
-    this.$selectedSpaceInfo = $('#selectedSpaceInfo');
+
+    this.$indicator = $('<div class="greenIndicator"></div>')
+      .hide();
+    this.hexGrid.root.appendChild(this.$indicator[0]);
   }
 
   setSelectedSpace(x, y) {
     if (_.isUndefined(x) || _.isUndefined(y)) {
       // unselect
       this.$selector.hide();
-      this.$selectedSpaceInfo.html('');
       return;
     }
 
@@ -118,10 +163,37 @@ class BoardView {
       left: pos.x,
       top: pos.y 
     });
+  }
 
-    var selectedSpaceHtml = `Selected Space: ${x}, ${y}`;
+  setMovementIndicator(callback) {
+    if (!callback) {
+      this.movementIndicatorCallback = undefined;
+      this.$indicator.hide();
+      return;
+    }
 
-    this.$selectedSpaceInfo.html(selectedSpaceHtml);
+    this.movementIndicatorCallback = callback;
+  }
+
+  onTileOver(axialPos) {
+    if (!this.tiles[toKey(axialPos)]) return;
+    if (!this.movementIndicatorCallback) return;
+
+    // add a green or red indicator based on this.movementIndicatorCallback(x,y)
+    var isInRange = this.movementIndicatorCallback(axialPos),
+      pos = this.getHexPosition(axialPos.x, axialPos.y);
+    this.$indicator.show()
+      .css({left: pos.x, top: pos.y})
+      .attr('class', isInRange ? 'greenIndicator' : 'redIndicator');
+
+    //console.log(`is ${x},${y} in range: ${isInRange}`);
+  }
+
+  onTileOut(x, y) {
+    if (!this.movementIndicatorCallback) return;
+
+    // hide previous indicator
+    this.$indicator.hide();
   }
 }
 
