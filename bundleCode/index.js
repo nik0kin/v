@@ -1,6 +1,6 @@
 module.exports = {
   boardGenerator: require('./hooks/boardGenerator'),
-  //gameStart: require('./code/gameStart'),
+  gameStart: require('./hooks/gameStart'),
 
   actions: {
 //    'OrderUnit': require('./actions/OrderUnit'),

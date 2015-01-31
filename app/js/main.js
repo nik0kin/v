@@ -12,6 +12,7 @@ var Spinal = SDK.Spinal();
 var myVikings;
 
 var newTurnHook = function (result) {
+  console.log('newTurnHook', result);
   myVikings.newTurnHook(result);
 };
 

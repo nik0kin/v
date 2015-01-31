@@ -1,3 +1,4 @@
+import _ from 'lib/lodash';
 
 import { hexkeyToPos, posTohexkey as toKey } from 'js/hexUtils';
 import Board from 'js/Board';
@@ -20,19 +21,25 @@ class Vikings {
     this.board = new Board(params);
 
     // testing
-    var testUnits = [
-      { id: 1, x: 0, y: 0, classType: 'viking', speed: 5 },
-      { id: 2, x: 0, y: 0, classType: 'shieldMaiden', speed: 4 },
-      { id: 3, x: 0, y: 0, classType: 'viking', speed: 5 },
-      { id: 4, x: 1, y: 0, classType: 'viking', speed: 5 },
-      { id: 5, x: 2, y: 2, classType: 'shieldMaiden', speed: 4 },
-      { id: 6, x: 2, y: 1, classType: 'shieldMaiden', speed: 4 },
-      { id: 7, x: 1, y: 2, classType: 'viking', speed: 5 },
-      { id: 8, x: 5, y: 4, classType: 'viking', speed: 5 }
-    ];
-    this.board.initUnits(testUnits);
+    this.initUnits(params.gameState.pieces)
   }
 
+  initUnits(pieces) {
+    var units = [];
+
+    _.each(pieces, function (piece) {
+      var pos = hexkeyToPos(piece.locationId);
+      units.push({
+        id: piece.id,
+        x: pos.x,
+        y: pos.y,
+        classType: piece.class.toLowerCase(),
+        speed: piece.attributes.speed
+      });
+    });
+
+    this.board.initUnits(units);
+  }
 
   newTurnHook(result) {
 

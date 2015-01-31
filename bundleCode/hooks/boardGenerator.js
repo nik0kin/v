@@ -45,7 +45,12 @@ module.exports = function (customBoardSettings, vikingRules) {
 };
 
 var terrainTypeWeights = {
-  "dirt" : .25, "grass" : .35, "hills" : .1, "water" :.05, "forest" : .25
+  dirt: .26,
+  grass: .33,
+  hills: .1,
+  water: .06,
+  forest: .24,
+  magic: .01
 };
 
 var getVikingSpaceId = function (x, y) {
