@@ -50,7 +50,8 @@ class BoardView {
 
     _.each(boardSpaces, function (bs) {
       var key = that.getHexKey(bs.x, bs.y),
-          $tile = $(`<div class="tile">${key}</div>`),
+          _class = `tile ${bs.terrainType}`,
+          $tile = $(`<div class="${_class}">${key}</div>`),
           pos = that.getHexPosition(bs.x, bs.y);
 
       $tile.css(toCssPos(pos));

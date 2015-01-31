@@ -16,8 +16,6 @@ class Vikings {
 
     that.ui = new UIView(this.moveUnitClickedCallback);
 
-    params.type = 'horizontal';
-    params.size = {width, height};
     params.clickSpaceCallback = this.clickSpaceCallback;
     this.board = new Board(params);
 

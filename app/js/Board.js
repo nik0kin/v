@@ -15,14 +15,16 @@ class Board {
     this.unitsBySpaceId = {};
 
     var boardSpaces = [];
-    _.times(params.size.height, function (y) {
-      _.times(params.size.width, function (x) {
-        var newSpace = {x, y, terrainType: 'dirt'},
-          key = toKey(x, y);
-        that.spacesById[key] = newSpace
-        boardSpaces.push(newSpace);
-        that.unitsBySpaceId[key] = {};
-      });
+    _.each(params.gameBoard.board, function (space) {
+      var pos = hexkeyToPos(space.id);
+      var newSpace = {
+        x: pos.x,
+        y: pos.y,
+        terrainType: space.attributes.terrainType
+      };
+      that.spacesById[space.id] = newSpace
+      boardSpaces.push(newSpace);
+      that.unitsBySpaceId[space.id] = {};
     });
 
     params.boardSpaces = boardSpaces;

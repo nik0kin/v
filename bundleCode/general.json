@@ -1,0 +1,43 @@
+{
+  "name" : "Vikings",
+  "turnSubmitStyle" : "playByMail",
+  "canAutoProgress": true,
+
+  "staticBoardSettings" : {
+    "boardStyle" : "hexGrid"
+  },
+
+  "gameSettings" : {
+    "playerLimit" : {
+      "min" : 2,
+      "max" : 10
+    },
+    "customBoardSettings" : {
+      "width" : {
+        "min" : 1,
+        "max" : 500
+      },
+      "height" : {
+        "min" : 1,
+        "max" : 500
+      }
+    }
+  },
+
+  "rules" : {
+    "spaces" : [{
+      "className" : "MoveableSpace",
+      "spots" : 1,
+      "attributes" : {
+        "terrainType" : ["dirt", "grass", "hills", "water", "forest"]
+      }
+    }],
+    "pieces" : [],
+
+    "dynamicBoard" : true,
+    "board" : [],
+
+    "startingPieces": {
+    }
+  }
+}

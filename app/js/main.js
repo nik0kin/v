@@ -5,23 +5,46 @@ import Vikings from 'js/Vikings';
 
 import sdk from 'lib/mule-sdk-js/mule-sdk';
 
-var vikingsParams = {
-  playareaElement: $('#playarea')[0]
-};
 
-var myVikings = new Vikings(vikingsParams);
-
-
-var SDK = sdk('http://localhost:3130/webservices/');
-
+var SDK = sdk('../../');
 var Spinal = SDK.Spinal();
 
-var config = {
-  gameId: '54b489c49cb8bfd8507d4837',
-  userId: '54976c2ecae1efca06ade299'
+var myVikings;
+
+var newTurnHook = function (result) {
+  myVikings.newTurnHook(result);
 };
 
-Spinal.initQ(config)
-  .then(function (result) {
-    console.log(result);
-  });
+var initMule = function () {  
+  var config = {
+    refreshTime: 15000,
+    turnSubmitStyle: 'playByMail',
+    gameIdUrlKey: 'gameId',
+    useSessionForUserId: true,
+    newTurnHook: newTurnHook
+  };
+
+  Spinal.initQ(config)
+    .then(function (result) {
+      console.log(result);
+      initVikings(result);
+    })
+    .catch(function (error) {
+      console.log(error, error.stack);
+    });
+};
+
+var initVikings = function (muleObjects) {
+  var vikingsParams = {
+    gameState: muleObjects.gameState,
+    gameBoard: muleObjects.gameBoard,
+    size: muleObjects.game.ruleBundleGameSettings.customBoardSettings,
+    playareaElement: $('#playarea')[0]
+  };
+
+  myVikings = new Vikings(vikingsParams);
+
+};
+
+
+initMule();

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-rm -rf bower_components/mule-sdk-js
+mkdir bower_components || rm -rf bower_components/mule-sdk-js
 cd bower_components/
 git clone git@github.com:nik0kin/mule-sdk-js
 cd mule-sdk-js
