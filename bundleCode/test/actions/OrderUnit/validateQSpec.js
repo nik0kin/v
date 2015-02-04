@@ -56,7 +56,7 @@ var validUnitWithNoOrders = {
 var validUnit = {
   locationId: '3,7',
   class: 'Viking',
-  unitId: 313,
+  id: 313,
   ownerId: 'p1',
   attributes: {
     speed: 4,

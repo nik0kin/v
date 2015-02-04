@@ -15,13 +15,14 @@ class Vikings {
     that = this;
     console.log('Vikings constructor', params);
 
-    that.ui = new UIView(this.moveUnitClickedCallback);
+    that.userPlayerRel = params.playerRel;
+
+    that.ui = new UIView(this.moveUnitClickedCallback, this.unitListClickedCallback);
 
     params.clickSpaceCallback = this.clickSpaceCallback;
     this.board = new Board(params);
 
-    // testing
-    this.initUnits(params.gameState.pieces)
+    this.initUnits(params.gameState.pieces);
   }
 
   initUnits(pieces) {
@@ -31,14 +32,25 @@ class Vikings {
       var pos = hexkeyToPos(piece.locationId);
       units.push({
         id: piece.id,
+        ownerId: piece.ownerId,
         x: pos.x,
         y: pos.y,
         classType: piece.class.toLowerCase(),
+        orders: piece.attributes.orders,
         speed: piece.attributes.speed
       });
     });
 
     this.board.initUnits(units);
+
+    var playerUnits = _.filter(units, function (unit) {
+      return unit.ownerId === that.userPlayerRel;
+    });
+    that.ui.setUnitListInfo(playerUnits);
+
+    if (playerUnits[0]) {
+      that.centerOn(playerUnits[0]);
+    }
   }
 
   newTurnHook(result) {
@@ -50,6 +62,10 @@ class Vikings {
     that.board.view.setSelectedSpace(pos.x, pos.y);
     that.ui.setSelectedSpaceInfo(that.board.getSpaceId(that.selected),
         that.board.getUnitsOnSpaceId(that.selected));
+  }
+
+  centerOn(pos) {
+    that.board.view.centerOn(pos.x, pos.y);
   }
 
   clickSpaceCallback(clickPos) {
@@ -115,6 +131,11 @@ class Vikings {
     that.moving = unitId;
     var unit = that.board.getUnit(unitId);
     that.board.view.setMovementIndicator(that.checkMoveAllowed(unit));
+  }
+
+  unitListClickedCallback(unit) {
+    that.selectSpace(unit);
+    that.centerOn(unit);
   }
 }
 

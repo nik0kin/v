@@ -1,3 +1,4 @@
+var randomUtils = require('../utils/randomUtils');
 
 var Unit = function (className, _piece) {
   var that = {};
@@ -14,7 +15,9 @@ var Unit = function (className, _piece) {
     isNew = true;
     piece = {
       class: className,
-      attributes: {}
+      attributes: {
+        orders: []
+      }
     };
   }
 
@@ -46,6 +49,14 @@ var Unit = function (className, _piece) {
     } else {
       M.addPiece(piece);
     }
+  };
+
+  that.getBonusInitiative = function () {
+    var bonusInit = piece.attributes.bonusInit;
+    if (!bonusInit) {
+      return 0;
+    }
+    return randomUtils.getRandomInt(bonusInit[0], bonusInit[1]);
   };
 
   return that;

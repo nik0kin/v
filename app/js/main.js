@@ -37,6 +37,7 @@ var initMule = function () {
 
 var initVikings = function (muleObjects) {
   var vikingsParams = {
+    playerRel: Spinal.getUserPlayerRel(),
     gameState: muleObjects.gameState,
     gameBoard: muleObjects.gameBoard,
     size: muleObjects.game.ruleBundleGameSettings.customBoardSettings,

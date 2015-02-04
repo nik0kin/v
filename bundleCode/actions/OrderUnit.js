@@ -57,7 +57,34 @@ exports.validateQ = validateQ;
 
 
 var doQ = function (M, actionOwnerRel, actionParams) {
+  var orderParams = {
+    CancelOrder: [],
+    Move: []
+  };
 
+  _.each(actionParams.orders, function (order) {
+    orderParams[order.type].push(order.params);
+  });
+
+  var unit = M.getPiece(actionParams.unitId);
+
+  // sort CancelOrder's descending by orderIndex, then delete orders
+  var sortedCancelOrders = _.sortBy(orderParams['CancelOrder'], function (params) {
+    return -params.orderIndex;
+  });
+  _.each(sortedCancelOrders, function (params) {
+    unit.attributes.orders.splice(params.orderIndex, 1);
+  });
+
+  // then append Move's to orders
+  _.each(orderParams['Move'], function (orderParams) {
+    unit.attributes.orders.push({
+      type: 'Move',
+      params: orderParams
+    });
+  });
+
+  return M.persistQ();
 };
 
 exports.doQ = doQ;

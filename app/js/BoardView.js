@@ -20,7 +20,9 @@ class BoardView {
     this.tiles = {};
     this.units = {};
     this.size = params.size;
-    this.createBoard(params.playareaElement, params.type,
+    this.element = params.playareaElement;
+    this.$element = $('#' + this.element.id);
+    this.createBoard(this.element, params.type,
         params.boardSpaces, params.size, params.clickSpaceCallback);
     this.initSelector();
   }
@@ -32,6 +34,14 @@ class BoardView {
   getHexPosition(x, y) {
     var hexlibPos = axialToHexlib(x, y);
     return this.hexGrid.screenpos(hexlibPos.x, hexlibPos.y);
+  }
+
+  centerOn(x, y) {
+    var pos = this.getHexPosition(x, y);
+    this.hexGrid.reorient(
+      -pos.x + this.$element.width()/2 - tileWidth/2,
+      -pos.y + this.$element.height()/2 - tileHeight/2
+    );
   }
 
   createBoard($playareaElement, type='horizontal', boardSpaces, size, clickSpaceCallback) {
@@ -59,8 +69,6 @@ class BoardView {
       tiles[key] = $tile;
       units[key] = [];
     });
-
-    grid.reorient(150, 0);
 
     grid.addEvent("tileclick", function(e, x, y) {
       var axialPos = hexlibToAxial(x, y);
