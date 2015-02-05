@@ -156,6 +156,10 @@ class BoardView {
     this.$indicator = $('<div class="greenIndicator"></div>')
       .hide();
     this.hexGrid.root.appendChild(this.$indicator[0]);
+
+    this.$indicatorNext = $('<div class="greenNextIndicator"></div>')
+      .hide();
+    this.hexGrid.root.appendChild(this.$indicatorNext[0]);
   }
 
   setSelectedSpace(x, y) {
@@ -168,10 +172,20 @@ class BoardView {
     // select
     this.$selector.show();
     var pos = this.getHexPosition(x, y);
-    this.$selector.css({
-      left: pos.x,
-      top: pos.y 
-    });
+    this.$selector.css(toCssPos(pos));
+  }
+
+  setIndicateNextSpace(x, y) {
+    if (_.isUndefined(x) || _.isUndefined(y)) {
+      // unselect
+      this.$indicatorNext.hide();
+      return;
+    }
+
+    // select
+    this.$indicatorNext.show();
+    var pos = this.getHexPosition(x, y);
+    this.$indicatorNext.css(toCssPos(pos));
   }
 
   setMovementIndicator(callback) {

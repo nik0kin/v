@@ -9,6 +9,8 @@ class Board {
   constructor(params) {
     that = this;
 
+    that.userPlayerRel = params.playerRel;
+
     that.spacesById = {};
 
     this.unitsById = {};
@@ -52,11 +54,50 @@ class Board {
   }
 
   addPendingOrder(unitId, order) {
+    if (!this.pendingTurn[unitId]) {
+      this.pendingTurn[unitId] = [];
+    }
 
+    this.pendingTurn[unitId].push(order);
   }
 
+  // determine if the order is in pendingTurn or a CancelOrder is needed
+  //   orderIndex is the index of the array returned by this.getOrders()
   removeOrder(unitId, orderIndex) {
+    var currentOrders = this.getOrders(unitId),
+        orderToRemove = currentOrders[orderIndex];
 
+    // look in pendingTurn
+    if (this.pendingTurn[unitId] && this.pendingTurn[unitId].length !== 0) {
+      var foundKey;
+      _.each(this.pendingTurn[unitId], (order, key) => {
+        console.log(order)
+        console.log(orderToRemove)
+        if (_.isEqual(order, orderToRemove)) {
+          foundKey = key;
+        }
+      });
+      if (!_.isUndefined(foundKey)) {
+        this.pendingTurn[unitId].splice(foundKey, 1);
+        return;
+      }
+    }
+
+    // look in original orders
+    var foundKey;
+    _.each(this.getUnit(unitId).orders, (order, key) => {
+      if (_.isEqual(order, orderToRemove)) {
+        foundKey = key;
+      }
+    });
+    if (!_.isUndefined(foundKey)) {
+      // add new CancelOrder order
+      this.addPendingOrder(unitId, {
+        type: 'CancelOrder',
+        params: {orderIndex: foundKey}
+      });
+      return;
+    }
   }
 
   getOrders(unitId) {
@@ -64,7 +105,52 @@ class Board {
     if (!unit) {
       throw 'invalid unitId';
     }
-    return unit.orders;
+
+    if (!this.pendingTurn[unitId] || this.pendingTurn[unitId].length === 0) {
+      return unit.orders;
+    }
+
+    var orders = {
+      CancelOrder: [],
+      Move: []
+    }
+
+    _.each(this.pendingTurn[unitId], (order) => {
+      orders[order.type].push(order);
+    });
+
+    // TODO strikethrough cancels, and turn X to an O? re reactivate
+
+    //  sort CancelOrders decending
+    var sortedCancelOrders = _.sortBy(orders['CancelOrder'], (cancelOrder) => {
+      return -cancelOrder.params.orderIndex;
+    });
+
+    var currentOrders = _.cloneDeep(unit.orders);
+    _.each(sortedCancelOrders, (cancelOrder) => {
+      currentOrders.splice(cancelOrder.params.orderIndex, 1);
+    });
+
+    // add Move orders
+    _.each(orders['Move'], (moveOrder) => {
+      currentOrders.push(moveOrder);
+    });
+
+    return currentOrders;
+  }
+
+  // returns an array of Actions
+  getSubmittableTurn() {
+    var actions = [];
+    _.each(this.pendingTurn, (orders, unitId) => {
+      var action = {
+        type: 'OrderUnit',
+        params: {unitId, orders}
+      };
+      actions.push(action);
+    });
+
+    return actions;
   }
 
   //////
@@ -97,6 +183,13 @@ class Board {
 
   getUnitsOnSpaceId(spaceId) {
     return that.unitsBySpaceId[spaceId];
+  }
+
+  getPlayerUnits() {
+    var playerUnits = _.filter(that.unitsById, (unit) => {
+      return unit.ownerId === that.userPlayerRel;
+    });
+    return playerUnits;
   }
 }
 

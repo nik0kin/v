@@ -84,6 +84,9 @@ var doQ = function (M, actionOwnerRel, actionParams) {
     });
   });
 
+  // save unit
+  M.setPiece(unit.id, unit);
+
   return M.persistQ();
 };
 

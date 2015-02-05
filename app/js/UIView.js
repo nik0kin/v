@@ -2,6 +2,9 @@ import _ from 'lib/lodash';
 
 class UIView {
   constructor(params) {
+    this.userPlayerRel = params.userPlayerRel;
+    $('#playerName').html(this.userPlayerRel);
+    this.submitButtonClickedCallback = params.submitButtonClickedCallback;
     this.moveUnitClickedCallback = params.moveUnitClickedCallback;
     this.unitListClickedCallback = params.unitListClickedCallback;
     this.selectUnitClickedCallback = params.selectUnitClickedCallback;
@@ -9,6 +12,8 @@ class UIView {
     this.$selectedSpaceInfo = $('#selectedSpaceInfo');
     this.$selectedUnitInfo = $('#selectedUnitInfo');
     this.$unitList = $('#unitlist');
+
+    $('#submitButton').click(this.submitButtonClickedCallback);
   }
 
   setUnitListInfo(units) {
@@ -24,7 +29,6 @@ class UIView {
     };
 
     _.each(units, function (unit) {
-      console.log(unit)
       htmlStr += `${unit.classType} ${unit.x},${unit.y} `;
       htmlStr += `<button id="unitlist${unit.id}">${getOrderButtonLabel(unit)}</button>`;
       htmlStr += '<br>';
@@ -43,7 +47,7 @@ class UIView {
   }
 
   setSelectedUnitInfo(unit, orders) {
-    if (_.isUndefined(unit)) {
+    if (_.isUndefined(unit) || unit.ownerId !== this.userPlayerRel) {
       this.$selectedUnitInfo.html('');
       return;
     }
@@ -71,7 +75,7 @@ class UIView {
     moveUnitButton.click(function () {
       if (moving) {
         that.moveUnitClickedCallback();
-        moveUnitButton.html(getMoveButtonLabel(unit));
+        moveUnitButton.html('Move');
         moving = false;
         return;
       }
@@ -97,16 +101,16 @@ class UIView {
 
     var selectedSpaceHtml = `Selected Space: ${space.x}, ${space.y} ${space.terrainType}<br><br>`;
 
+    var that = this;
     _.each(units, function (unit) {
-      selectedSpaceHtml += `<button id="selectunit${unit.id}">`;
-      selectedSpaceHtml += `${unit.classType} id=${unit.id} `;
-      selectedSpaceHtml += `</button><br>`;
+      selectedSpaceHtml += unit.ownerId === that.userPlayerRel ? `<button id="selectunit${unit.id}">` : '';
+      selectedSpaceHtml += `${unit.classType} id=${unit.id} ${unit.ownerId}`;
+      selectedSpaceHtml += unit.ownerId === that.userPlayerRel ? `</button><br>` : `<br>`;
     });
 
     this.$selectedSpaceInfo.html(selectedSpaceHtml);
 
     // initilize move click callbacks
-    var that = this;
     _.each(units, function (unit) {
       var selectUnitButton = $(`#selectunit${unit.id}`);
       selectUnitButton.click(() => {

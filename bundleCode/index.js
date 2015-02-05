@@ -3,7 +3,7 @@ module.exports = {
   gameStart: require('./hooks/gameStart'),
 
   actions: {
-//    'OrderUnit': require('./actions/OrderUnit'),
+    'OrderUnit': require('./actions/OrderUnit'),
 //    'OrderBuilding': require('./actions/OrderBuilding')
   }
 

@@ -38,6 +38,7 @@ var initMule = function () {
 var initVikings = function (muleObjects) {
   var vikingsParams = {
     playerRel: Spinal.getUserPlayerRel(),
+    submitCallback: submitCallback,
     gameState: muleObjects.gameState,
     gameBoard: muleObjects.gameBoard,
     size: muleObjects.game.ruleBundleGameSettings.customBoardSettings,
@@ -46,6 +47,17 @@ var initVikings = function (muleObjects) {
 
   myVikings = new Vikings(vikingsParams);
 
+};
+
+var submitCallback = function (actions) {
+  Spinal.submitTurnQ(actions)
+    .then(function (result) {
+      console.log('Submitted turn');
+      console.log(result);
+    })
+    .catch(function (err) {
+      alert(JSON.stringify(err));
+    });
 };
 
 

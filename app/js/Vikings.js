@@ -1,6 +1,6 @@
 import _ from 'lib/lodash';
 
-import { hexkeyToPos, posTohexkey as toKey } from 'js/hexUtils';
+import { hexkeyToPos, posTohexkey as toKey, axialHexManhattanDistance } from 'js/hexUtils';
 import Board from 'js/Board';
 import UIView from 'js/UIView';
 
@@ -16,8 +16,11 @@ class Vikings {
     console.log('Vikings constructor', params);
 
     that.userPlayerRel = params.playerRel;
+    that.submitCallback = params.submitCallback;
 
     that.ui = new UIView({
+      userPlayerRel: this.userPlayerRel,
+      submitButtonClickedCallback: this.submitButtonClickedCallback,
       moveUnitClickedCallback: this.moveUnitClickedCallback,
       unitListClickedCallback: this.unitListClickedCallback,
       selectUnitClickedCallback: this.selectUnitClickedCallback,
@@ -49,13 +52,10 @@ class Vikings {
 
     this.board.initUnits(units);
 
-    var playerUnits = _.filter(units, function (unit) {
-      return unit.ownerId === that.userPlayerRel;
-    });
-    that.ui.setUnitListInfo(playerUnits);
+    this.setUnitListInfo();
 
-    if (playerUnits[0]) {
-      that.centerOn(playerUnits[0]);
+    if (this.playerUnits[0]) {
+      that.centerOn(this.playerUnits[0]);
     }
   }
 
@@ -63,17 +63,40 @@ class Vikings {
 
   }
 
+  setUnitListInfo() {
+    this.playerUnits = _.cloneDeep(that.board.getPlayerUnits());
+    _.each(this.playerUnits, (unit) => {
+      unit.orders = that.board.getOrders(unit.id);
+    });
+    that.ui.setUnitListInfo(this.playerUnits);
+  }
+
   selectSpace(pos) {
     that.selected = toKey(pos);
     that.board.view.setSelectedSpace(pos.x, pos.y);
     that.ui.setSelectedSpaceInfo(that.board.getSpaceId(that.selected),
         that.board.getUnitsOnSpaceId(that.selected));
+    that.board.view.setIndicateNextSpace();
   }
 
   selectUnit(unitId) {
-    var unit = that.board.getUnit(unitId);
-    that.ui.setSelectedUnitInfo(unit, that.board.getOrders(unitId));
+    var unit = that.board.getUnit(unitId),
+        unitOrders = that.board.getOrders(unitId);
+    that.ui.setSelectedUnitInfo(unit, unitOrders);
     that.selectSpace(unit);
+
+    this.showUnitNextMove(unitOrders);
+  }
+
+  showUnitNextMove(orders) {
+    var nextMoveOrder = _.find(orders, (order) => {
+      return order.type === 'Move';
+    });
+    if (nextMoveOrder) {
+      that.board.view.setIndicateNextSpace(nextMoveOrder.params.x, nextMoveOrder.params.y);
+    } else {
+      that.board.view.setIndicateNextSpace();
+    }
   }
 
   centerOn(pos) {
@@ -94,6 +117,7 @@ class Vikings {
       that.board.view.setSelectedSpace();
       that.ui.setSelectedUnitInfo();
       that.ui.setSelectedSpaceInfo();
+      that.board.view.setIndicateNextSpace();
       return;
     } else if (!that.selected) {
       // no selections
@@ -110,29 +134,49 @@ class Vikings {
   tryToMoveUnit(unitId, spaceId) {
     var unit = that.board.getUnit(unitId),
         spacePos = hexkeyToPos(spaceId),
-        allowed = that.checkMoveAllowed(unit)(spacePos);
+        allowed = that.checkMoveAllowed(unit, spacePos);
+
+    if (spacePos.x === unit.x && spacePos.y === unit.y) {
+      // moving to the same spot, ignore
+      that.moving = undefined;
+      that.board.view.setMovementIndicator();
+      that.selectUnit(unitId); // cheap way to get reset button
+      return;
+    }
 
     if (allowed) {
-      console.log(`moving ${unitId} to ${spaceId}`);
-      that.board.moveUnit(unitId, spaceId);
-      that.moving = undefined;
-      that.selectSpace(spacePos);
+      that.addMoveOrder(unitId, spaceId);
     } else {
       console.log('cant move there!');
     }
   }
 
-  checkMoveAllowed(unit) {
+  addMoveOrder(unitId, spaceId) {
+    console.log(`adding Move order: ${unitId} to ${spaceId}`);
+    //that.board.moveUnit(unitId, spaceId);
+    that.board.addPendingOrder(unitId, {
+      type: 'Move',
+      params: hexkeyToPos(spaceId)
+    });
+    that.moving = undefined;
+    that.board.view.setMovementIndicator();
+    that.selectUnit(unitId);
+    that.setUnitListInfo();
+  }
+
+  isWithinDistance(unit, ) {
     return function (spacePos) {
-      if (that.board.getUnitsOnSpaceId(toKey(spacePos)).length >= 3) {
-        return false;
-      }
-
-      var yDelta = unit.y - spacePos.y,
-        xDelta = unit.x - spacePos.x;
-
-      return Math.sqrt(Math.pow(xDelta, 2) + Math.pow(yDelta, 2)) < unit.speed;
+      var distance = axialHexManhattanDistance(unit.x, unit.y, spacePos.x, spacePos.y);
+      return distance <= unit.speed;
     };
+  }
+
+  checkMoveAllowed(unit, spacePos) {
+    if (that.board.getUnitsOnSpaceId(toKey(spacePos)).length >= 3) {
+      return false;
+    }
+
+    return true;
   }
 
   // gets called when a move button on the side panel gets pressed
@@ -145,7 +189,7 @@ class Vikings {
     console.log('starting moving ' + unitId);
     that.moving = unitId;
     var unit = that.board.getUnit(unitId);
-    that.board.view.setMovementIndicator(that.checkMoveAllowed(unit));
+    that.board.view.setMovementIndicator(that.isWithinDistance(unit));
   }
 
   selectUnitClickedCallback(unitId) {
@@ -160,6 +204,9 @@ class Vikings {
       return;
     }
     console.log(`cancel unit(${unitId}) order: ${orderIndex}`);
+    that.board.removeOrder(unitId, orderIndex);
+    that.selectUnit(unitId);
+    that.setUnitListInfo();
   }
 
   unitListClickedCallback(unit) {
@@ -168,6 +215,11 @@ class Vikings {
     }
     that.selectUnit(unit.id);
     that.centerOn(unit);
+  }
+
+  submitButtonClickedCallback() {
+    var actions = that.board.getSubmittableTurn();
+    that.submitCallback(actions);
   }
 }
 
