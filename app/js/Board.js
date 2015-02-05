@@ -29,6 +29,8 @@ class Board {
 
     params.boardSpaces = boardSpaces;
     this.view = new BoardView(params);
+
+    this.initOrders();
   }
 
   initUnits(units) {
@@ -41,6 +43,31 @@ class Board {
     that.unitsById[unit.id] = unit;
     that.unitsBySpaceId[toKey(unit.x, unit.y)][unit.id] = unit;
   }
+
+  //////
+  //this.pendingTurn = {} of OrderUnit actions, key=unitId
+
+  initOrders() {
+    this.pendingTurn = {};
+  }
+
+  addPendingOrder(unitId, order) {
+
+  }
+
+  removeOrder(unitId, orderIndex) {
+
+  }
+
+  getOrders(unitId) {
+    var unit = this.unitsById[unitId];
+    if (!unit) {
+      throw 'invalid unitId';
+    }
+    return unit.orders;
+  }
+
+  //////
 
   moveUnit(unitId, spaceId) {
     var spacePos = hexkeyToPos(spaceId),

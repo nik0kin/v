@@ -17,7 +17,12 @@ class Vikings {
 
     that.userPlayerRel = params.playerRel;
 
-    that.ui = new UIView(this.moveUnitClickedCallback, this.unitListClickedCallback);
+    that.ui = new UIView({
+      moveUnitClickedCallback: this.moveUnitClickedCallback,
+      unitListClickedCallback: this.unitListClickedCallback,
+      selectUnitClickedCallback: this.selectUnitClickedCallback,
+      cancelUnitOrderClickedCallback: this.cancelUnitOrderClickedCallback
+    });
 
     params.clickSpaceCallback = this.clickSpaceCallback;
     this.board = new Board(params);
@@ -37,6 +42,7 @@ class Vikings {
         y: pos.y,
         classType: piece.class.toLowerCase(),
         orders: piece.attributes.orders,
+        initiative: piece.attributes.initiative,
         speed: piece.attributes.speed
       });
     });
@@ -64,6 +70,12 @@ class Vikings {
         that.board.getUnitsOnSpaceId(that.selected));
   }
 
+  selectUnit(unitId) {
+    var unit = that.board.getUnit(unitId);
+    that.ui.setSelectedUnitInfo(unit, that.board.getOrders(unitId));
+    that.selectSpace(unit);
+  }
+
   centerOn(pos) {
     that.board.view.centerOn(pos.x, pos.y);
   }
@@ -80,16 +92,19 @@ class Vikings {
       // current selection
       that.selected = undefined;
       that.board.view.setSelectedSpace();
+      that.ui.setSelectedUnitInfo();
       that.ui.setSelectedSpaceInfo();
       return;
     } else if (!that.selected) {
       // no selections
       that.selectSpace(clickPos);
+      that.ui.setSelectedUnitInfo();
       return;
     }
 
     // selection while having a selection
     that.selectSpace(clickPos);
+    that.ui.setSelectedUnitInfo();
   }
 
   tryToMoveUnit(unitId, spaceId) {
@@ -133,8 +148,25 @@ class Vikings {
     that.board.view.setMovementIndicator(that.checkMoveAllowed(unit));
   }
 
+  selectUnitClickedCallback(unitId) {
+    if (that.moving) {
+      return;
+    }
+    that.selectUnit(unitId);
+  }
+
+  cancelUnitOrderClickedCallback(unitId, orderIndex) {
+    if (that.moving) {
+      return;
+    }
+    console.log(`cancel unit(${unitId}) order: ${orderIndex}`);
+  }
+
   unitListClickedCallback(unit) {
-    that.selectSpace(unit);
+    if (that.moving) {
+      return;
+    }
+    that.selectUnit(unit.id);
     that.centerOn(unit);
   }
 }

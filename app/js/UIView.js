@@ -1,10 +1,13 @@
 import _ from 'lib/lodash';
 
 class UIView {
-  constructor(moveUnitClickedCallback, unitListClickedCallback){
-    this.moveUnitClickedCallback = moveUnitClickedCallback;
-    this.unitListClickedCallback = unitListClickedCallback;
+  constructor(params) {
+    this.moveUnitClickedCallback = params.moveUnitClickedCallback;
+    this.unitListClickedCallback = params.unitListClickedCallback;
+    this.selectUnitClickedCallback = params.selectUnitClickedCallback;
+    this.cancelUnitOrderClickedCallback = params.cancelUnitOrderClickedCallback;
     this.$selectedSpaceInfo = $('#selectedSpaceInfo');
+    this.$selectedUnitInfo = $('#selectedUnitInfo');
     this.$unitList = $('#unitlist');
   }
 
@@ -39,22 +42,65 @@ class UIView {
     })
   }
 
+  setSelectedUnitInfo(unit, orders) {
+    if (_.isUndefined(unit)) {
+      this.$selectedUnitInfo.html('');
+      return;
+    }
+
+    var htmlStr = '',
+        moveButtonId = `moveunit${unit.id}`;
+
+    htmlStr += `${unit.classType} id=${unit.id}<br>`;
+    htmlStr += `speed=${unit.speed}, initiative=${unit.initiative}<br>`;
+
+    _.each(orders, (order, key) => {
+      htmlStr += `- ${order.type} ${order.params.x},${order.params.y} `;
+      htmlStr += `<button id="cancelorder${key}">X</button><br>`;
+    });
+
+    htmlStr += `<button id="${moveButtonId}">Move</button>`;
+    htmlStr += '<br>';
+
+    this.$selectedUnitInfo.html(htmlStr);
+
+    // initalize move click callback
+    var that = this;
+    var moveUnitButton = $('#' + moveButtonId);
+    var moving = false;
+    moveUnitButton.click(function () {
+      if (moving) {
+        that.moveUnitClickedCallback();
+        moveUnitButton.html(getMoveButtonLabel(unit));
+        moving = false;
+        return;
+      }
+      that.moveUnitClickedCallback(unit.id);
+      moveUnitButton.html('MOVING');
+      moving = true;
+    });
+
+    // initalize cancel order click callbacks
+    _.each(orders, (order, key) => {
+      var cancelOrderButton = $(`#cancelorder${key}`);
+      cancelOrderButton.click(() => {
+        that.cancelUnitOrderClickedCallback(unit.id, key);
+      });
+    });
+  }
+
   setSelectedSpaceInfo(space, units) {
     if (_.isUndefined(space)) {
       this.$selectedSpaceInfo.html('');
       return;
     }
 
-    var getMoveButtonLabel = function (unit) {
-      return `Move ${unit.speed} or fewer`;
-    };
-
     var selectedSpaceHtml = `Selected Space: ${space.x}, ${space.y} ${space.terrainType}<br><br>`;
 
     _.each(units, function (unit) {
+      selectedSpaceHtml += `<button id="selectunit${unit.id}">`;
       selectedSpaceHtml += `${unit.classType} id=${unit.id} `;
-      selectedSpaceHtml += `<button id="moveunit${unit.id}">${getMoveButtonLabel(unit)}</button>`;
-      selectedSpaceHtml += '<br>';
+      selectedSpaceHtml += `</button><br>`;
     });
 
     this.$selectedSpaceInfo.html(selectedSpaceHtml);
@@ -62,23 +108,13 @@ class UIView {
     // initilize move click callbacks
     var that = this;
     _.each(units, function (unit) {
-      var moveUnitButton = $(`#moveunit${unit.id}`);
-      var moving = false;
-      moveUnitButton.click(function () {
-        if (moving) {
-          that.moveUnitClickedCallback();
-          moveUnitButton.html(getMoveButtonLabel(unit));
-          moving = false;
-          return;
-        }
-        that.moveUnitClickedCallback(unit.id);
-        moveUnitButton.html('MOVING');
-        moving = true;
+      var selectUnitButton = $(`#selectunit${unit.id}`);
+      selectUnitButton.click(() => {
+        that.selectUnitClickedCallback(unit.id);
       });
-    })
+    });
   }
 
 }
-
 
 export default UIView;
