@@ -12,8 +12,12 @@ var Spinal = SDK.Spinal();
 var myVikings;
 
 var newTurnHook = function (result) {
-  console.log('newTurnHook', result);
-  myVikings.newTurnHook(result);
+  try {
+    console.log('newTurnHook', result);
+    myVikings.newTurnHook(result);
+  } catch (error) {
+    console.log(error, error.stack);
+  }
 };
 
 var initMule = function () {  
@@ -29,6 +33,8 @@ var initMule = function () {
     .then(function (result) {
       console.log(result);
       initVikings(result);
+      Spinal.startRefresh();
+      updateRefreshLabel();
     })
     .catch(function (error) {
       console.log(error, error.stack);
@@ -37,8 +43,11 @@ var initMule = function () {
 
 var initVikings = function (muleObjects) {
   var vikingsParams = {
+    turnSubmitStyle: 'playByMail',
     playerRel: Spinal.getUserPlayerRel(),
     submitCallback: submitCallback,
+    currentTurn: muleObjects.currentTurn,
+    game: muleObjects.game,
     gameState: muleObjects.gameState,
     gameBoard: muleObjects.gameBoard,
     size: muleObjects.game.ruleBundleGameSettings.customBoardSettings,
@@ -49,14 +58,31 @@ var initVikings = function (muleObjects) {
 
 };
 
+var updateRefreshLabel = function () {
+  var secondsLeft = Math.floor(Spinal.getTimeTilNextRefresh() / 1000),
+      refreshString;
+
+  if (secondsLeft > 0) {
+    refreshString = 'Refresh in ' + secondsLeft;
+  } else {
+    refreshString = 'Refreshing';
+  }
+
+  $('#refreshLabel').html(refreshString);
+
+  setTimeout(updateRefreshLabel, 1000);
+};
+
 var submitCallback = function (actions) {
   Spinal.submitTurnQ(actions)
     .then(function (result) {
       console.log('Submitted turn');
       console.log(result);
+      myVikings.submitSuccess();
     })
     .catch(function (err) {
       alert(JSON.stringify(err));
+      myVikings.submitFailure();
     });
 };
 

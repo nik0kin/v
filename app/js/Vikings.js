@@ -30,10 +30,12 @@ class Vikings {
     params.clickSpaceCallback = this.clickSpaceCallback;
     this.board = new Board(params);
 
-    this.initUnits(params.gameState.pieces);
+    that.ui.initPlayerLabels(params.game.players);
+
+    this.initUnits(params.gameState.pieces, params.currentTurn);
   }
 
-  initUnits(pieces) {
+  initUnits(pieces, currentTurn) {
     var units = [];
 
     _.each(pieces, function (piece) {
@@ -52,6 +54,11 @@ class Vikings {
 
     this.board.initUnits(units);
 
+    if (currentTurn && currentTurn.playerTurns[this.userPlayerRel]) {
+      that.board.initExistingTurn(currentTurn.playerTurns[this.userPlayerRel]);
+      that.ui.setSubmitToResubmit();
+    }
+
     this.setUnitListInfo();
 
     if (this.playerUnits[0]) {
@@ -60,7 +67,12 @@ class Vikings {
   }
 
   newTurnHook(result) {
+    that.ui.setSubmitToNormal();
 
+    that.board.updateUnits(result.gameState.pieces);
+    that.selectUnit(that.selectedUnit);
+    that.setUnitListInfo();
+    that.ui.resetPlayerLabels();
   }
 
   setUnitListInfo() {
@@ -80,8 +92,14 @@ class Vikings {
   }
 
   selectUnit(unitId) {
+    if (!unitId) {
+      that.selectedUnit = unitId;
+      that.ui.setSelectedUnitInfo();
+      return;
+    }
     var unit = that.board.getUnit(unitId),
         unitOrders = that.board.getOrders(unitId);
+    that.selectedUnit = unitId;
     that.ui.setSelectedUnitInfo(unit, unitOrders);
     that.selectSpace(unit);
 
@@ -123,12 +141,14 @@ class Vikings {
       // no selections
       that.selectSpace(clickPos);
       that.ui.setSelectedUnitInfo();
+      that.selectedUnit = undefined;
       return;
     }
 
     // selection while having a selection
     that.selectSpace(clickPos);
     that.ui.setSelectedUnitInfo();
+    that.selectedUnit = undefined;
   }
 
   tryToMoveUnit(unitId, spaceId) {
@@ -218,8 +238,18 @@ class Vikings {
   }
 
   submitButtonClickedCallback() {
+    that.ui.setSubmitToInProgress();
     var actions = that.board.getSubmittableTurn();
     that.submitCallback(actions);
+  }
+
+  submitSuccess() {
+    that.ui.setSubmitToResubmit();
+    that.ui.setPlayerLabelSubmitted(that.userPlayerRel);
+  }
+
+  submitFailure() {
+    that.ui.setSubmitToNormal();
   }
 }
 

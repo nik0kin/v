@@ -3,7 +3,7 @@ import _ from 'lib/lodash';
 class UIView {
   constructor(params) {
     this.userPlayerRel = params.userPlayerRel;
-    $('#playerName').html(this.userPlayerRel);
+    this.$playerLabel = $('#playerName');
     this.submitButtonClickedCallback = params.submitButtonClickedCallback;
     this.moveUnitClickedCallback = params.moveUnitClickedCallback;
     this.unitListClickedCallback = params.unitListClickedCallback;
@@ -12,8 +12,64 @@ class UIView {
     this.$selectedSpaceInfo = $('#selectedSpaceInfo');
     this.$selectedUnitInfo = $('#selectedUnitInfo');
     this.$unitList = $('#unitlist');
+    this.$submitButton = $('#submitButton');
 
-    $('#submitButton').click(this.submitButtonClickedCallback);
+    this.$submitButton.click(this.submitButtonClickedCallback);
+  }
+
+  setSubmitToInProgress() {
+    this.$submitButton.html('...');
+    this.$submitButton.prop("disabled", true);
+  }
+
+  setSubmitToResubmit() {
+    this.$submitButton.html('Re-Submit');
+    this.$submitButton.prop("disabled", false);
+  }
+
+  setSubmitToNormal() {
+    this.$submitButton.html('Submit');
+    this.$submitButton.prop("disabled", false);
+  }
+
+  initPlayerLabels(players) {
+    var htmlStr = '';
+    var that = this;
+    that.players = players;
+    _.each(players, function (playerInfo, playerRel) {
+      var played = !playerInfo.played ? '*' : '';
+      if (playerRel !== that.userPlayerRel) {
+        htmlStr += `- <span id="${playerRel}playerLabel">${playerInfo.name}${played}</span>`;
+      } else {
+        that.getPlayerLabel(that.userPlayerRel).html(`${playerInfo.name}${played}`);
+      }
+    });
+    $('#otherPlayers').html(htmlStr);
+  }
+
+  getPlayerLabel(playerRel) {
+    if (playerRel === this.userPlayerRel) {
+      return this.$playerLabel;
+    } else {
+      return $('#' + playerRel + 'playerLabel');
+    }
+  }
+
+  resetPlayerLabels() {
+    var that = this;
+    _.each(this.players, (p, playerRel) => {
+      that.setPlayerLabelNotSubmitted(playerRel);
+    });
+  }
+
+  setPlayerLabelSubmitted(playerRel) {
+    var playerName = this.players[playerRel].name;
+    this.getPlayerLabel(playerRel).html(playerName);
+  }
+
+  setPlayerLabelNotSubmitted(playerRel) {
+    var playerName = this.players[playerRel].name;
+    this.getPlayerLabel(playerRel).html(playerName + '*');
   }
 
   setUnitListInfo(units) {

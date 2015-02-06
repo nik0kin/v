@@ -46,6 +46,36 @@ class Board {
     that.unitsBySpaceId[toKey(unit.x, unit.y)][unit.id] = unit;
   }
 
+  // convert existing turn to pendingTurn
+  //   opposite of getSubmittableTurn()
+  initExistingTurn(turn) {
+    var actions = turn.actions;
+
+    _.each(actions, (action) => {
+      if (action.type === 'OrderUnit') {
+        this.pendingTurn[action.params.unitId] = action.params.orders;
+      }
+    });
+  }
+
+  // called on newTurn
+  updateUnits(units) {
+    _.each(units, (unit) => {
+      var localUnit = this.unitsById[unit.id];
+      if (localUnit) {
+        // update unit
+        var pos = hexkeyToPos(unit.locationId);
+        localUnit.x = pos.x;
+        localUnit.y = pos.y;
+        localUnit.orders = unit.attributes.orders;
+      } else {
+        // make new unit
+      }
+    });
+
+    this.initOrders();
+  }
+
   //////
   //this.pendingTurn = {} of OrderUnit actions, key=unitId
 
