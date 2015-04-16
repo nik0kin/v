@@ -1,4 +1,4 @@
-var lodash = require('lodash');
+var _ = require('lodash');
 
 var Viking = require('../classes/Viking'),
     ShieldMaiden = require('../classes/ShieldMaiden');
@@ -28,7 +28,9 @@ var loadPiecesIntoClasses = function (pieces) {
   var pieceMap = {};
 
   _.each(pieces, function (piece) {
-    pieceMap[piece.id] = loadPieceIntoClass();
+    if (ClassMap[piece.class.toLowerCase()]) {
+      pieceMap[piece.id] = loadPieceIntoClass(piece);
+    }
   });
 
   return pieceMap;

@@ -5,9 +5,9 @@ module.exports = {
   actions: {
     'OrderUnit': require('./actions/OrderUnit'),
 //    'OrderBuilding': require('./actions/OrderBuilding')
-  }
+  },
 
   //progressTurn: undefined, // doesnt exist because this is playByMail
-  //progressRound: require('./code/progressRound'),
+  progressRound: require('./hooks/progressRound'),
   //winCondition: require('./code/winCondition')
 };

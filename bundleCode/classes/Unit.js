@@ -1,3 +1,5 @@
+var _ = require('lodash');
+
 var randomUtils = require('../utils/randomUtils');
 
 var Unit = function (className, _piece) {
@@ -39,6 +41,10 @@ var Unit = function (className, _piece) {
     piece.locationId = locationId;
   };
 
+  that.getAttr = function (key) {
+    return piece.attributes[key];
+  };
+
   that.setAttr = function (key, value) {
     piece.attributes[key] = value;
   };
@@ -57,6 +63,14 @@ var Unit = function (className, _piece) {
       return 0;
     }
     return randomUtils.getRandomInt(bonusInit[0], bonusInit[1]);
+  };
+
+  that.getNextOrder = function () {
+    return _.first(piece.attributes.orders);
+  };
+
+  that.removeOrder = function (index) {
+    piece.attributes.orders.splice(index, 1);
   };
 
   return that;
