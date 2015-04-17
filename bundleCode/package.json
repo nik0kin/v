@@ -10,9 +10,11 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^3.0.1",
-    "pathfinding": "git+https://git@github.com/nik0kin/pathfinding.js.git",
+    "pathfinding": "git+https://git@github.com/nik0kin/pathfinding.js.git#hex",
     "q": "^1.1.2",
-    "should": "^4.6.3",
     "weighted": "^0.2.2"
+  },
+  "devDependencies": {
+    "should": "^4.6.5"
   }
 }

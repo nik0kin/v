@@ -8,7 +8,14 @@ var OrdersMap = {
 
 var progressRoundHook = function (M) {
   var allUnits = mUtils.loadPiecesIntoClasses(M.getPieces()),
-      metaData = {};
+      metaData = {
+        orders: {}
+      };
+
+  // reset units turn variables
+  _.each(allUnits, function (unit, id) {
+    unit.resetTurnVars();
+  });
 
   // sort units by initiative decending
   var sortedByInitiativeUnits = _.sortBy(allUnits, function (unit, id) {
@@ -28,17 +35,31 @@ var progressRoundHook = function (M) {
     var orderOrder = OrdersMap[order.type];
 
     if (orderOrder) {
-      orderOrder.execute(unit, order.params);
+      var orderMetadata = orderOrder.execute(unit, order.params, M);
+
+      metaData.orders[id].push(orderMetadata);
+
+      if (orderMetadata.doNextOrder) {
+        unit.removeOrder(0);
+        executeNextOrder(unit, id);
+      }
+      unit.save(M);
     }
   };
 
   _.each(sortedByInitiativeUnits, function (unit) {
     var id = unit.getId();
     M.log('id' + id + ' - ' + unit.getAttr('initiative') + 'i');
+    metaData.orders[id] = [];
     executeNextOrder(unit, id);
   });
 
-  return metaData;
+  M.log(JSON.stringify(metaData));
+
+  return M.persistQ()
+    .then(function () {
+      return metaData;
+    });
 };
 
 module.exports = progressRoundHook;

@@ -18,6 +18,7 @@ var Unit = function (className, _piece) {
     piece = {
       class: className,
       attributes: {
+        stepsUsed: 0,
         orders: []
       }
     };
@@ -40,6 +41,12 @@ var Unit = function (className, _piece) {
   that.setLocation = function (locationId) {
     piece.locationId = locationId;
   };
+
+  that.getLocationPos = function () {
+    var spl = piece.locationId.split(','),
+        pos = {x: spl[0], y: spl[1]};
+    return pos;
+  }
 
   that.getAttr = function (key) {
     return piece.attributes[key];
@@ -70,7 +77,15 @@ var Unit = function (className, _piece) {
   };
 
   that.removeOrder = function (index) {
+    if (piece.attributes.orders.length === 0) {
+      return;
+    }
     piece.attributes.orders.splice(index, 1);
+  };
+
+
+  that.resetTurnVars = function () {
+    that.setAttr('stepsUsed', 0);
   };
 
   return that;

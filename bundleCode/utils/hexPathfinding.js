@@ -1,7 +1,9 @@
-var PF = require('pathfinding');
+var PF = require('pathfinding'),
+    _ = require('lodash');
 
 
 exports.getPath = function (startPos, endPos, hashMap) {
+  console.log('generating a path from ' + JSON.stringify(startPos) + ' to ' + JSON.stringify(endPos));
   var hexGrid = new PF.AxialHexGrid(hashMap);
 
   var finder = new PF.AStarFinder({
