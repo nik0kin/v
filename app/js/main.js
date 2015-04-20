@@ -63,12 +63,25 @@ var updateRefreshLabel = function () {
       refreshString;
 
   if (secondsLeft > 0) {
-    refreshString = 'Refresh in ' + secondsLeft;
+    var i, s = '';
+    for (i=0;i<secondsLeft;i++) {s+='.'}
+    refreshString = s;
   } else {
-    refreshString = 'Refreshing';
+    refreshString = '~.~.~.~.~.~';
   }
 
   $('#refreshLabel').html(refreshString);
+
+  var game = Spinal.getGame();
+  var secondsTilTurn = (new Date(game.nextTurnTime).getTime() - Date.now()) / 1000;
+
+  var seconds = Math.round(secondsTilTurn % 60),
+      minutes = Math.floor(secondsTilTurn / 60),
+      hours = Math.floor(secondsTilTurn / (60*60));
+
+  var timeTilString = 'Turn ' + Spinal.getHistory().currentTurn + ' in ';
+  timeTilString += hours + ':' + minutes + ':' + seconds;
+  $('#timeTilTurn').html(timeTilString);
 
   setTimeout(updateRefreshLabel, 1000);
 };

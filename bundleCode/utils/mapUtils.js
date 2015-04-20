@@ -7,7 +7,7 @@ var mSpacesToHashmap = function (M) {
   var hashMap = {};
 
   _.each(spaces, function (space) {
-    hashMap[space.boardSpaceId] = true;
+    hashMap[space.boardSpaceId] = space;
   });
 
   return hashMap;

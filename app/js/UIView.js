@@ -9,9 +9,9 @@ class UIView {
     this.unitListClickedCallback = params.unitListClickedCallback;
     this.selectUnitClickedCallback = params.selectUnitClickedCallback;
     this.cancelUnitOrderClickedCallback = params.cancelUnitOrderClickedCallback;
-    this.$selectedSpaceInfo = $('#selectedSpaceInfo');
-    this.$selectedUnitInfo = $('#selectedUnitInfo');
-    this.$unitList = $('#unitlist');
+    this.$selectedSpaceInfo = $('#selectedSpaceInfo > p');
+    this.$selectedUnitInfo = $('#selectedUnitInfo > p');
+    this.$unitList = $('#unitlist > p');
     this.$submitButton = $('#submitButton');
 
     this.$submitButton.click(this.submitButtonClickedCallback);

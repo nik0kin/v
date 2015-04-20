@@ -18,7 +18,7 @@ var executeMove = function (unit, params, M) {
   var hashMap = mapUtils.mSpacesToHashmap(M);
 
   // generate a path
-  var startPos = moveMetaData.startPos = unit.getLocationPos(),
+  var startPos = moveMetaData.startPos = finalPos = unit.getLocationPos(),
       endPos = params,
       path = hexPathfinding.getPath(startPos, endPos, hashMap);
   console.log(path);
