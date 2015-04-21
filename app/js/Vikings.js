@@ -33,6 +33,9 @@ class Vikings {
     that.ui.initPlayerLabels(params.game.players);
 
     this.initUnits(params.gameState.pieces, params.currentTurn);
+    this.initModes();
+
+    that.startReviewMode(params.lastTurn.turnNumber);
   }
 
   initUnits(pieces, currentTurn) {
@@ -73,7 +76,61 @@ class Vikings {
     that.selectUnit(that.selectedUnit);
     that.setUnitListInfo();
     that.ui.resetPlayerLabels();
+
+    that.startReviewMode(result.turn.turnNumber);
   }
+
+  // STATES //
+
+  initModes() {
+    this.inReview = false;
+    this.toReview = []; // using as a queue
+    this.ui.setClickReviewButtonCallback(this.clickReviewButton);
+  }
+
+  startReviewMode(turnNumber) {
+    console.log('Review: ', turnNumber)
+
+    // If Reviewing already, dont interrupt and add to stack
+    if (this.inReview) {
+      this.toReview.push(turnNumber);
+      return;
+    }
+
+    // If in Play Mode, show turn list
+    this.ui.setReviewModeLabel();
+
+    // set turn info
+    this.ui.setTurnList(turnNumber);
+
+    this.inReview = turnNumber;
+  }
+
+  clickReviewButton() {
+    console.log('Turn Review ' + that.inReview);
+
+    // ...
+
+    that.inReview = false;
+
+    // show possible next turn review
+    if (that.toReview.length > 0) {
+      var nextTurnNumber = _.first(that.toReview);
+      that.toReview = _.rest(that.toReview); // pop
+      that.startReviewMode(nextTurnNumber);
+    } else {
+      // otherwise startPlayMode
+      setTimeout(() => {
+        that.startPlayMode.call(that);
+      }, 1000);
+    }
+  }
+
+  startPlayMode() {
+    this.ui.setPlayModeLabel();
+  }
+
+  /////////////
 
   setUnitListInfo() {
     this.playerUnits = _.cloneDeep(that.board.getPlayerUnits());
@@ -251,6 +308,7 @@ class Vikings {
   submitFailure() {
     that.ui.setSubmitToNormal();
   }
+
 }
 
 export default Vikings;

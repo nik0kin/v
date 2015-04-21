@@ -47,6 +47,7 @@ var initVikings = function (muleObjects) {
     playerRel: Spinal.getUserPlayerRel(),
     submitCallback: submitCallback,
     currentTurn: muleObjects.currentTurn,
+    lastTurn: muleObjects.lastTurn,
     game: muleObjects.game,
     gameState: muleObjects.gameState,
     gameBoard: muleObjects.gameBoard,
@@ -64,7 +65,7 @@ var updateRefreshLabel = function () {
 
   if (secondsLeft > 0) {
     var i, s = '';
-    for (i=0;i<secondsLeft;i++) {s+='.'}
+    for (i=0;i<secondsLeft;i++) {s+='.';}
     refreshString = s;
   } else {
     refreshString = '~.~.~.~.~.~';

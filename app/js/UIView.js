@@ -4,14 +4,21 @@ class UIView {
   constructor(params) {
     this.userPlayerRel = params.userPlayerRel;
     this.$playerLabel = $('#playerName');
+    this.$modeLabel = $('#moreinfo');
     this.submitButtonClickedCallback = params.submitButtonClickedCallback;
     this.moveUnitClickedCallback = params.moveUnitClickedCallback;
     this.unitListClickedCallback = params.unitListClickedCallback;
     this.selectUnitClickedCallback = params.selectUnitClickedCallback;
     this.cancelUnitOrderClickedCallback = params.cancelUnitOrderClickedCallback;
     this.$selectedSpaceInfo = $('#selectedSpaceInfo > p');
+    this.$selectedSpaceIcon = $('#selectedSpaceInfo > div');
     this.$selectedUnitInfo = $('#selectedUnitInfo > p');
+    this.$selectedUnitIcon = $('#selectedUnitInfo > img');
     this.$unitList = $('#unitlist > p');
+    this.$turnList = $('#turnlist > p');
+    this.$turnListButton = $('#turnlist > button');
+    this.$block2UnitList = $('#unitlist');
+    this.$block2TurnList = $('#turnlist');
     this.$submitButton = $('#submitButton');
 
     this.$submitButton.click(this.submitButtonClickedCallback);
@@ -85,6 +92,7 @@ class UIView {
     };
 
     _.each(units, function (unit) {
+      htmlStr += `<img src="img/unit_icons/${unit.classType}.png" style="width:25px;height:25px"> `;
       htmlStr += `${unit.classType} ${unit.x},${unit.y} `;
       htmlStr += `<button id="unitlist${unit.id}">${getOrderButtonLabel(unit)}</button>`;
       htmlStr += '<br>';
@@ -105,6 +113,7 @@ class UIView {
   setSelectedUnitInfo(unit, orders) {
     if (_.isUndefined(unit) || unit.ownerId !== this.userPlayerRel) {
       this.$selectedUnitInfo.html('');
+      this.$selectedUnitIcon.hide();
       return;
     }
 
@@ -123,6 +132,10 @@ class UIView {
     htmlStr += '<br>';
 
     this.$selectedUnitInfo.html(htmlStr);
+
+    // set icon
+    this.$selectedUnitIcon.show();
+    this.$selectedUnitIcon.prop('src', 'img/unit_icons/' + unit.classType + '.png');
 
     // initalize move click callback
     var that = this;
@@ -152,6 +165,7 @@ class UIView {
   setSelectedSpaceInfo(space, units) {
     if (_.isUndefined(space)) {
       this.$selectedSpaceInfo.html('');
+      this.$selectedSpaceIcon.hide();
       return;
     }
 
@@ -166,6 +180,11 @@ class UIView {
 
     this.$selectedSpaceInfo.html(selectedSpaceHtml);
 
+    // set icon image
+    this.$selectedSpaceIcon.removeClass();
+    this.$selectedSpaceIcon.addClass('tile ' + space.terrainType);
+    this.$selectedSpaceIcon.show();
+
     // initilize move click callbacks
     _.each(units, function (unit) {
       var selectUnitButton = $(`#selectunit${unit.id}`);
@@ -175,6 +194,29 @@ class UIView {
     });
   }
 
+
+  setReviewModeLabel() {
+    this.$modeLabel.html('REVIEW');
+    this.$modeLabel.css('background-color', '#386BF5');
+    this.$block2UnitList.hide();
+    this.$block2TurnList.show();
+  }
+
+  setPlayModeLabel() {
+    this.$modeLabel.html('PLAY');
+    this.$modeLabel.css('background-color', 'green');
+    this.$block2TurnList.hide();
+    this.$block2UnitList.show();
+  }
+
+  setTurnList(turnNumber) {
+    this.$turnList.html('TURN STUFF FOR' + turnNumber);
+    this.$turnListButton.html('Show Turn ' + turnNumber);
+  }
+
+  setClickReviewButtonCallback(clickReviewButtonCallback) {
+    this.$turnListButton.click(clickReviewButtonCallback);
+  }
 }
 
 export default UIView;

@@ -22,7 +22,7 @@
         <div id="turnsummary" class="col-md-3 border">
             <span id="playerName">Niko</span> <span id="otherPlayers">- p2* p3</span><br>
             <button id="submitButton">Submit</button>
-            <span id="timeTilTurn"> Turn 5 in 10:27:04</span>
+            <span id="timeTilTurn"> Turn 0 in 00:07:00</span>
             <br>
             <span id="refreshLabel"> .... </span>
         </div>
@@ -32,16 +32,28 @@
     </div>
     <div class="row">
         <div class="col-md-3">
-            <div id="unitlist" class="row border">
-                <h4 class="divtitle">Unit List</h3>
-                <p></p>
+            <div id="moreinfo" class="row border">
+                PLAY
+            </div>
+            <div id="block2" class="row border">
+                <div id="unitlist">
+                    <h4 class="divtitle">Unit List</h3>
+                    <p></p>
+                </div>
+                <div id="turnlist" style="display:none">
+                    <h4 class="divtitle">Turn List</h3>
+                    <button> Show Turn 0 </button>
+                    <p></p>
+                </div>
             </div>
             <div id="selectedSpaceInfo" class="row border">
                 <h4 class="divtitle">Selected Space</h3>
+                <div class="tile grass" style="position:absolute;top:50%;left:75%"></div>
                 <p></p>
             </div>
             <div id="selectedUnitInfo" class="row border">
                 <h4 class="divtitle">Selected Unit</h3>
+                <img style="position:absolute;top:76%;left:80%;width:50px;height:50px"
                 <p></p>
             </div>
         </div>
