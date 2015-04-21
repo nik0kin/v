@@ -32,10 +32,13 @@ class Vikings {
 
     that.ui.initPlayerLabels(params.game.players);
 
+    this.turns = {};
+    this.turns[params.lastTurn.turnNumber] = params.lastTurn;
+
     this.initUnits(params.gameState.pieces, params.currentTurn);
     this.initModes();
 
-    that.startReviewMode(params.lastTurn.turnNumber);
+    that.startReviewMode(params.lastTurn);
   }
 
   initUnits(pieces, currentTurn) {
@@ -77,7 +80,8 @@ class Vikings {
     that.setUnitListInfo();
     that.ui.resetPlayerLabels();
 
-    that.startReviewMode(result.turn.turnNumber);
+    that.turns[result.turn.turnNumber] = result.turn;
+    that.startReviewMode(result.turn);
   }
 
   // STATES //
@@ -88,12 +92,12 @@ class Vikings {
     this.ui.setClickReviewButtonCallback(this.clickReviewButton);
   }
 
-  startReviewMode(turnNumber) {
-    console.log('Review: ', turnNumber)
+  startReviewMode(turn) {
+    console.log('Review: ', turn.turnNumber);
 
     // If Reviewing already, dont interrupt and add to stack
     if (this.inReview) {
-      this.toReview.push(turnNumber);
+      this.toReview.push(turn.turnNumber);
       return;
     }
 
@@ -101,9 +105,10 @@ class Vikings {
     this.ui.setReviewModeLabel();
 
     // set turn info
-    this.ui.setTurnList(turnNumber);
+    var turnMetadata = turn.metaTurn.actions[0].metadata;
+    this.ui.setTurnList(turn.turnNumber, turnMetadata, this.board.getUnit);
 
-    this.inReview = turnNumber;
+    this.inReview = turn.turnNumber;
   }
 
   clickReviewButton() {
@@ -117,7 +122,7 @@ class Vikings {
     if (that.toReview.length > 0) {
       var nextTurnNumber = _.first(that.toReview);
       that.toReview = _.rest(that.toReview); // pop
-      that.startReviewMode(nextTurnNumber);
+      that.startReviewMode(that.turns[nextTurnNumber]);
     } else {
       // otherwise startPlayMode
       setTimeout(() => {

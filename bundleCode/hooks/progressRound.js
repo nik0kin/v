@@ -9,7 +9,7 @@ var OrdersMap = {
 var progressRoundHook = function (M) {
   var allUnits = mUtils.loadPiecesIntoClasses(M.getPieces()),
       metaData = {
-        orders: {}
+        orders: []
       };
 
   // reset units turn variables
@@ -37,7 +37,8 @@ var progressRoundHook = function (M) {
     if (orderOrder) {
       var orderMetadata = orderOrder.execute(unit, order.params, M);
 
-      metaData.orders[id].push(orderMetadata);
+      orderMetadata.unitId = id;
+      metaData.orders.push(orderMetadata);
 
       if (orderMetadata.doNextOrder) {
         unit.removeOrder(0);
@@ -50,7 +51,6 @@ var progressRoundHook = function (M) {
   _.each(sortedByInitiativeUnits, function (unit) {
     var id = unit.getId();
     M.log('id' + id + ' - ' + unit.getAttr('initiative') + 'i');
-    metaData.orders[id] = [];
     executeNextOrder(unit, id);
   });
 

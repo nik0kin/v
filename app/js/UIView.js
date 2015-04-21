@@ -92,7 +92,7 @@ class UIView {
     };
 
     _.each(units, function (unit) {
-      htmlStr += `<img src="img/unit_icons/${unit.classType}.png" style="width:25px;height:25px"> `;
+      htmlStr += `<img src="img/unit_icons/${unit.classType}.png" class="smallIcon"> `;
       htmlStr += `${unit.classType} ${unit.x},${unit.y} `;
       htmlStr += `<button id="unitlist${unit.id}">${getOrderButtonLabel(unit)}</button>`;
       htmlStr += '<br>';
@@ -209,9 +209,26 @@ class UIView {
     this.$block2UnitList.show();
   }
 
-  setTurnList(turnNumber) {
-    this.$turnList.html('TURN STUFF FOR' + turnNumber);
+  setTurnList(turnNumber, turnMetadata, getUnit) {
     this.$turnListButton.html('Show Turn ' + turnNumber);
+
+    var htmlStr = '';
+    _.each(turnMetadata.orders, function (order) {
+      switch (order.orderType) {
+        case 'Move':
+          var lastPos = order.path[order.path.length-1],
+              unit = getUnit(order.unitId);
+
+          htmlStr += `<img src="img/unit_icons/${unit.classType}.png" class="smallIcon">`;
+          htmlStr += `${unit.initiative}). ${order.unitId}-${unit.classType} moved to ${lastPos.x},${lastPos.y}`;
+          break;
+      }
+      htmlStr += '<br>';
+    });
+    if (turnMetadata.orders.length === 0) {
+      htmlStr = 'NO ORDERS PLAYED';
+    }
+    this.$turnList.html(htmlStr);
   }
 
   setClickReviewButtonCallback(clickReviewButtonCallback) {
