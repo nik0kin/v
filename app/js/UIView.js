@@ -11,7 +11,9 @@ class UIView {
     this.selectUnitClickedCallback = params.selectUnitClickedCallback;
     this.cancelUnitOrderClickedCallback = params.cancelUnitOrderClickedCallback;
     this.$selectedSpaceInfo = $('#selectedSpaceInfo > p');
-    this.$selectedSpaceIcon = $('#selectedSpaceInfo > div');
+    this.$selectedSpaceIcon = $('#selectedSpaceTile');
+    this.$selectedSpaceTerrainLabel = $('#selectedSpaceTerrainLabel');
+    this.$selectedSpacePositionLabel = $('#selectedSpacePositionLabel');
     this.$selectedUnitInfo = $('#selectedUnitInfo > p');
     this.$selectedUnitIcon = $('#selectedUnitInfo > img');
     this.$unitList = $('#unitlist > p');
@@ -166,10 +168,12 @@ class UIView {
     if (_.isUndefined(space)) {
       this.$selectedSpaceInfo.html('');
       this.$selectedSpaceIcon.hide();
+      this.$selectedSpacePositionLabel.hide();
+      this.$selectedSpaceTerrainLabel.hide();
       return;
     }
 
-    var selectedSpaceHtml = `Selected Space: ${space.x}, ${space.y} ${space.terrainType}<br><br>`;
+    var selectedSpaceHtml = '';
 
     var that = this;
     _.each(units, function (unit) {
@@ -185,6 +189,12 @@ class UIView {
     this.$selectedSpaceIcon.addClass('tile ' + space.terrainType);
     this.$selectedSpaceIcon.show();
 
+    // set terrain and position labels
+    this.$selectedSpacePositionLabel.html(`${space.x}, ${space.y}`);
+    this.$selectedSpaceTerrainLabel.html(space.terrainType);
+    this.$selectedSpacePositionLabel.show();
+    this.$selectedSpaceTerrainLabel.show();
+
     // initilize move click callbacks
     _.each(units, function (unit) {
       var selectUnitButton = $(`#selectunit${unit.id}`);
@@ -194,6 +204,13 @@ class UIView {
     });
   }
 
+  showReviewButton() {
+    this.$turnListButton.show();
+  }
+
+  hideReviewButton() {
+    this.$turnListButton.hide();
+  }
 
   setReviewModeLabel() {
     this.$modeLabel.html('REVIEW');
@@ -214,6 +231,7 @@ class UIView {
 
     var htmlStr = '';
     _.each(turnMetadata.orders, function (order) {
+      htmlStr += '<div class="order">';
       switch (order.orderType) {
         case 'Move':
           var lastPos = order.path[order.path.length-1],
@@ -223,12 +241,21 @@ class UIView {
           htmlStr += `${unit.initiative}). ${order.unitId}-${unit.classType} moved to ${lastPos.x},${lastPos.y}`;
           break;
       }
+      htmlStr += '</div>';
       htmlStr += '<br>';
     });
     if (turnMetadata.orders.length === 0) {
       htmlStr = 'NO ORDERS PLAYED';
     }
     this.$turnList.html(htmlStr);
+  }
+
+  // select the specific order while its 'animating'
+  setTurnOrderCurrent(n) {
+    $('.review-current-order').removeClass('review-current-order');
+
+    var x = $($('#turnlist > p > div')[n]); // grosssssssss
+    x.addClass('review-current-order');
   }
 
   setClickReviewButtonCallback(clickReviewButtonCallback) {

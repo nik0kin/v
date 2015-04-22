@@ -11,6 +11,7 @@ var executeMove = function (unit, params, M) {
       },
       unitSpeed = unit.getAttr('speed'),
       stepsToGo = unitSpeed - unit.getAttr('stepsUsed'),
+      stepsUsed = 0,
       finalPos,
       doneMoving = false;
 
@@ -41,6 +42,7 @@ var executeMove = function (unit, params, M) {
 
     // step on space
     stepsToGo--;
+    stepsUsed++;
     finalPos = pos;
     moveMetaData.path.push(pos);
 
@@ -58,6 +60,12 @@ var executeMove = function (unit, params, M) {
   // move unit
   unit.setLocation(finalPos.x + ',' + finalPos.y);
   unit.setAttr('stepsUsed', unitSpeed - stepsToGo);
+
+  if (stepsUsed === 0) {
+    moveMetaData.obsolete = true;
+  } else {
+    moveMetaData.stepsUsed = stepsUsed;
+  }
 
   return moveMetaData;
 };

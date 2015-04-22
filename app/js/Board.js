@@ -64,9 +64,9 @@ class Board {
       var localUnit = this.unitsById[unit.id];
       if (localUnit) {
         // update unit
-        var pos = hexkeyToPos(unit.locationId);
-        localUnit.x = pos.x;
-        localUnit.y = pos.y;
+        //var pos = hexkeyToPos(unit.locationId);
+        //localUnit.x = pos.x;
+        //localUnit.y = pos.y;
         localUnit.orders = unit.attributes.orders;
       } else {
         // make new unit

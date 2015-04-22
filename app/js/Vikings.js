@@ -4,6 +4,9 @@ import { hexkeyToPos, posTohexkey as toKey, axialHexManhattanDistance } from 'js
 import Board from 'js/Board';
 import UIView from 'js/UIView';
 
+import sdk from 'lib/mule-sdk-js/mule-sdk';
+var Q = sdk('../../').Q;
+
 // TESTING
 var width = 8,
   height = 6;
@@ -84,6 +87,15 @@ class Vikings {
     that.startReviewMode(result.turn);
   }
 
+  getTurnMeta(turnNumber) {
+    var turn = this.turns[turnNumber];
+    if (turn) {
+      return turn.metaTurn.actions[0].metadata;
+    } else {
+      return undefined;
+    }
+  }
+
   // STATES //
 
   initModes() {
@@ -102,6 +114,7 @@ class Vikings {
     }
 
     // If in Play Mode, show turn list
+    that.ui.showReviewButton();
     this.ui.setReviewModeLabel();
 
     // set turn info
@@ -114,21 +127,80 @@ class Vikings {
   clickReviewButton() {
     console.log('Turn Review ' + that.inReview);
 
-    // ...
+    that.ui.hideReviewButton();
 
-    that.inReview = false;
+    that.review(() => {
+      that.inReview = false;
 
-    // show possible next turn review
-    if (that.toReview.length > 0) {
-      var nextTurnNumber = _.first(that.toReview);
-      that.toReview = _.rest(that.toReview); // pop
-      that.startReviewMode(that.turns[nextTurnNumber]);
-    } else {
-      // otherwise startPlayMode
-      setTimeout(() => {
-        that.startPlayMode.call(that);
+      // show possible next turn review
+      if (that.toReview.length > 0) {
+        var nextTurnNumber = _.first(that.toReview);
+        that.toReview = _.rest(that.toReview); // pop
+        that.startReviewMode(that.turns[nextTurnNumber]);
+      } else {
+        // otherwise startPlayMode
+        setTimeout(() => {
+          that.startPlayMode.call(that);
+        }, 1000);
+      }
+    });
+  }
+
+  // play review
+  review(callback) {
+    var turnMetadata = that.getTurnMeta(that.inReview);
+
+    if (_.isEmpty(turnMetadata.orders)) {
+      return setTimeout(() => {
+        callback.call(that);
       }, 1000);
     }
+
+    // spend 2 seconds per turn "animating" it
+    var reviewMove = function (moveOrderMeta, cb) {
+      console.log(moveOrderMeta)
+      var startPos = moveOrderMeta.startPos,
+          lastPos = moveOrderMeta.path[moveOrderMeta.path.length - 1],
+          pos = lastPos.x + ',' + lastPos.y,
+          unitId = moveOrderMeta.unitId;
+
+      // center on unit
+      that.board.view.centerOn(startPos.x, startPos.y);
+
+      setTimeout(() => {
+        // move unit
+        that.board.moveUnit(unitId, pos);
+
+        // center on unit
+        that.board.view.centerOn(lastPos.x, lastPos.y);
+
+        setTimeout(cb, 1000);
+      }, 1000);
+    };
+
+    var promise = Q();
+
+    // foreach order
+    _.each(turnMetadata.orders, (order, key) => {
+      promise = promise.then(function () {
+        return Q.promise((resolve) => {
+          console.log('order ' + key);
+          // select move order (css)
+          that.ui.setTurnOrderCurrent(key);
+          // call reviewMove
+          try {
+            reviewMove(order, resolve);
+          } catch (e) {
+            console.log(e.stack)
+          }
+        });
+      });
+    });
+
+    promise.done(function () {
+      console.log('orders done');
+      callback.call(that);
+    });
   }
 
   startPlayMode() {

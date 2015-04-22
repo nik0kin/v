@@ -38,7 +38,10 @@ var progressRoundHook = function (M) {
       var orderMetadata = orderOrder.execute(unit, order.params, M);
 
       orderMetadata.unitId = id;
-      metaData.orders.push(orderMetadata);
+
+      if (!orderMetadata.obsolete) {
+        metaData.orders.push(orderMetadata);
+      }
 
       if (orderMetadata.doNextOrder) {
         unit.removeOrder(0);
