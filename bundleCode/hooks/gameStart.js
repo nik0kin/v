@@ -33,6 +33,9 @@ var gameStartHook = function (M) {
     viking.save(M);
     var shieldMaiden = createUnit('ShieldMaiden', playerRelId, spaceId);
     shieldMaiden.save(M);
+
+    var meadHall = createUnit('MeadHall', playerRelId, spaceId);
+    meadHall.save(M);
   });
 
   return M.persistQ();

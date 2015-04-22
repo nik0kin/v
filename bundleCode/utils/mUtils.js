@@ -1,9 +1,13 @@
 var _ = require('lodash');
 
+var MeadHall = require('../classes/MeadHall');
+
 var Viking = require('../classes/Viking'),
     ShieldMaiden = require('../classes/ShieldMaiden');
 
 var ClassMap = {
+  'meadhall': MeadHall,
+
   'viking': Viking,
   'shieldmaiden': ShieldMaiden
 };

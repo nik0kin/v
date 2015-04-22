@@ -1,5 +1,7 @@
 var _ = require('lodash');
 
+var Move = require('../orders/Move');
+
 var validateCancelOrder = function (M, unit, orderParams, actionParams) {
   var orderIndex = orderParams.orderIndex;
   if (!unit.attributes.orders[orderIndex]) {
@@ -20,17 +22,10 @@ var validateCancelOrder = function (M, unit, orderParams, actionParams) {
   }
 };
 
-var validateMove = function (M, unit, orderParams, actionParams) {
-  var spaceId = orderParams.x + ',' + orderParams.y,
-      space = M.getSpace(spaceId);
-    if (!space) {
-      throw 'invalid Move space x,y does not exist: ' + spaceId;
-    }
-};
 
 var validateOrder = {
   'CancelOrder': validateCancelOrder,
-  'Move': validateMove
+  'Move': Move.validate,
 };
 
 var validateQ = function (M, actionOwnerRel, actionParams) {

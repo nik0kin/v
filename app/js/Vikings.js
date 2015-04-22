@@ -36,12 +36,14 @@ class Vikings {
     that.ui.initPlayerLabels(params.game.players);
 
     this.turns = {};
-    this.turns[params.lastTurn.turnNumber] = params.lastTurn;
 
     this.initUnits(params.gameState.pieces, params.currentTurn);
     this.initModes();
 
-    that.startReviewMode(params.lastTurn);
+    if (params.lastTurn) {
+      this.turns[params.lastTurn.turnNumber] = params.lastTurn;
+      this.startReviewMode(params.lastTurn);
+    }
   }
 
   initUnits(pieces, currentTurn) {

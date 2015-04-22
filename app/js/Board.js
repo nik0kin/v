@@ -41,7 +41,11 @@ class Board {
 
   // add new units
   addUnit(unit) {
-    that.view.placeUnit(unit.x, unit.y, unit.classType);
+    if (unit.speed) {
+      that.view.placeUnit(unit.x, unit.y, unit.classType);
+    } else {
+      that.view.placeBuilding(unit.x, unit.y, unit.classType);
+    }
     that.unitsById[unit.id] = unit;
     that.unitsBySpaceId[toKey(unit.x, unit.y)][unit.id] = unit;
   }

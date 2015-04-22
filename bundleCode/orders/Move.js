@@ -3,6 +3,19 @@ var _ = require('lodash');
 var hexPathfinding = require('../utils/hexPathfinding'),
     mapUtils = require('../utils/mapUtils');
 
+var validateMove = function (M, unit, orderParams, actionParams) {
+  var spaceId = orderParams.x + ',' + orderParams.y,
+      space = M.getSpace(spaceId);
+  if (!space) {
+    throw 'invalid Move space x,y does not exist: ' + spaceId;
+  }
+  if (!unit.attributes.speed) {
+    throw 'unit ' + unit['class'] + ' cannot Move';
+  }
+};
+
+exports.validate = validateMove;
+
 var executeMove = function (unit, params, M) {
   var moveMetaData = {
         orderType: 'Move',

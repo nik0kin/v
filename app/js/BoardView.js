@@ -19,6 +19,7 @@ class BoardView {
   constructor(params) {
     this.tiles = {};
     this.units = {};
+    this.buildings = {};
     this.size = params.size;
     this.element = params.playareaElement;
     this.$element = $('#' + this.element.id);
@@ -90,18 +91,34 @@ class BoardView {
     });
   }
 
+  // pixel position
+  getBuildingPosition(x, y) {
+    var pos = this.getHexPosition(x, y);
+    return {x: pos.x + 22, y: pos.y + 22};
+  };
   getUnitPosition(x, y, spotsTaken) {
     var pos = this.getHexPosition(x, y),
       add;
 
     add = {
       0: {x: 4, y: 10},
-      1: {x: 22, y: 25},
+      1: {x: 20, y: 23},
       2: {x: 42, y: 10}
     }[spotsTaken];
 
     return {x: pos.x + add.x, y: pos.y + add.y};
   };
+
+  placeBuilding(x, y, classType) {
+    var $newBuilding = $(`<div class="${classType}"></div>`),
+      key = this.getHexKey(x,y),
+      pos = this.getBuildingPosition(x, y);
+
+    $newBuilding.css(toCssPos(pos));
+
+    $newBuilding.appendTo(this.hexGrid.root);
+    this.buildings[key] = $newBuilding;
+  }
 
   placeUnit(x, y, classType) {
     var $newUnit = $(`<div class="${classType}"></div>`),
