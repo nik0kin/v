@@ -13,6 +13,7 @@ var myVikings;
 
 var newTurnHook = function (result) {
   try {
+    Spinal.setRefreshTime(15000);
     console.log('newTurnHook', result);
     myVikings.newTurnHook(result);
   } catch (error) {
@@ -59,6 +60,22 @@ var initVikings = function (muleObjects) {
 
 };
 
+var getTimeString = function (secondsTilTurn) {
+  var seconds = Math.round(secondsTilTurn % 60),
+      minutes = Math.floor(secondsTilTurn / 60),
+      hours = Math.floor(secondsTilTurn / (60*60));
+
+  if (seconds < 0) seconds = 0;
+  if (minutes < 0) minutes = 0;
+  if (hours < 0) hours = 0;
+
+  var sStr = seconds < 10 ? '0' + seconds : seconds,
+      mStr = minutes < 10 ? '0' + minutes : minutes,
+      hStr = hours < 10 ? '0' + hours : hours;
+
+  return hStr + ':' + mStr + ':' + sStr;
+};
+
 var updateRefreshLabel = function () {
   var secondsLeft = Math.floor(Spinal.getTimeTilNextRefresh() / 1000),
       refreshString;
@@ -68,7 +85,7 @@ var updateRefreshLabel = function () {
     for (i=0;i<secondsLeft;i++) {s+='.';}
     refreshString = s;
   } else {
-    refreshString = '~.~.~.~.~.~';
+    refreshString = '~........~';
   }
 
   $('#refreshLabel').html(refreshString);
@@ -76,12 +93,13 @@ var updateRefreshLabel = function () {
   var game = Spinal.getGame();
   var secondsTilTurn = (new Date(game.nextTurnTime).getTime() - Date.now()) / 1000;
 
-  var seconds = Math.round(secondsTilTurn % 60),
-      minutes = Math.floor(secondsTilTurn / 60),
-      hours = Math.floor(secondsTilTurn / (60*60));
-
   var timeTilString = 'Turn ' + Spinal.getHistory().currentTurn + ' in ';
-  timeTilString += hours + ':' + minutes + ':' + seconds;
+  var timeString = getTimeString(secondsTilTurn);
+  if (timeString === '00:00:00') {
+    Spinal.setRefreshTime(2000);
+  }
+
+  timeTilString += timeString;
   $('#timeTilTurn').html(timeTilString);
 
   setTimeout(updateRefreshLabel, 1000);
