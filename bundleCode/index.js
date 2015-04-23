@@ -1,5 +1,7 @@
 module.exports = {
+  customBoardSettingsValidator: require('./hooks/customBoardSettingsValidator'),
   boardGenerator: require('./hooks/boardGenerator'),
+
   gameStart: require('./hooks/gameStart'),
 
   actions: {
