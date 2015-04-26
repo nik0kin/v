@@ -94,7 +94,7 @@ class UIView {
     };
 
     _.each(units, function (unit) {
-      htmlStr += `<img src="img/unit_icons/${unit.classType}.png" class="smallIcon"> `;
+      htmlStr += `<img src="img/icons/${unit.classType}.png" class="smallIcon"> `;
       htmlStr += `${unit.classType} ${unit.x},${unit.y} `;
       htmlStr += `<button id="unitlist${unit.id}">${getOrderButtonLabel(unit)}</button>`;
       htmlStr += '<br>';
@@ -137,7 +137,7 @@ class UIView {
 
     // set icon
     this.$selectedUnitIcon.show();
-    this.$selectedUnitIcon.prop('src', 'img/unit_icons/' + unit.classType + '.png');
+    this.$selectedUnitIcon.prop('src', 'img/icons/' + unit.classType + '.png');
 
     // initalize move click callback
     var that = this;
@@ -237,7 +237,7 @@ class UIView {
           var lastPos = order.path[order.path.length-1],
               unit = getUnit(order.unitId);
 
-          htmlStr += `<img src="img/unit_icons/${unit.classType}.png" class="smallIcon">`;
+          htmlStr += `<img src="img/icons/${unit.classType}.png" class="smallIcon">`;
           htmlStr += `${unit.initiative}). ${order.unitId}-${unit.classType} moved to ${lastPos.x},${lastPos.y}`;
           break;
       }

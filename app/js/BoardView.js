@@ -110,7 +110,7 @@ class BoardView {
   };
 
   placeBuilding(x, y, classType) {
-    var $newBuilding = $(`<div class="${classType}"></div>`),
+    var $newBuilding = $(`<div class="building ${classType}"></div>`),
       key = this.getHexKey(x,y),
       pos = this.getBuildingPosition(x, y);
 
@@ -121,7 +121,7 @@ class BoardView {
   }
 
   placeUnit(x, y, classType) {
-    var $newUnit = $(`<div class="${classType}"></div>`),
+    var $newUnit = $(`<div class="unit ${classType}"></div>`),
       key = this.getHexKey(x,y),
       pos = this.getUnitPosition(x, y, this.units[key].length);
 
