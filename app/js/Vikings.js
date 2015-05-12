@@ -7,9 +7,6 @@ import UIView from 'js/UIView';
 import sdk from 'lib/mule-sdk-js/mule-sdk';
 var Q = sdk('../../').Q;
 
-// TESTING
-var width = 8,
-  height = 6;
 
 var that; //lol
 
@@ -25,6 +22,7 @@ class Vikings {
       userPlayerRel: this.userPlayerRel,
       submitButtonClickedCallback: this.submitButtonClickedCallback,
       moveUnitClickedCallback: this.moveUnitClickedCallback,
+      produceUnitClickedCallback: this.produceUnitClickedCallback,
       unitListClickedCallback: this.unitListClickedCallback,
       selectUnitClickedCallback: this.selectUnitClickedCallback,
       cancelUnitOrderClickedCallback: this.cancelUnitOrderClickedCallback
@@ -51,16 +49,7 @@ class Vikings {
 
     _.each(pieces, function (piece) {
       var pos = hexkeyToPos(piece.locationId);
-      units.push({
-        id: piece.id,
-        ownerId: piece.ownerId,
-        x: pos.x,
-        y: pos.y,
-        classType: piece.class.toLowerCase(),
-        orders: piece.attributes.orders,
-        initiative: piece.attributes.initiative,
-        speed: piece.attributes.speed
-      });
+      units.push(that.board.mPieceToVikingUnit(piece));
     });
 
     this.board.initUnits(units);
@@ -180,6 +169,21 @@ class Vikings {
       }, 1000);
     };
 
+    var reviewProduceUnit = function (produceOrderMeta, cb) {
+      var unitId = produceOrderMeta.unitId,
+          building = that.board.getUnit(unitId);
+
+      // center on building producing
+      that.board.view.centerOn(building.x, building.y);
+
+      if (produceOrderMeta.finish) {
+        // show unit
+        that.board.view.placeUnit(building.x, building.y, produceOrderMeta.classType);
+      }
+
+      setTimeout(cb, 500);
+    };
+
     var promise = Q();
 
     // foreach order
@@ -189,9 +193,19 @@ class Vikings {
           console.log('order ' + key);
           // select move order (css)
           that.ui.setTurnOrderCurrent(key);
-          // call reviewMove
+
+          // call reviewOrder
           try {
-            reviewMove(order, resolve);
+            switch (order.orderType) {
+              case 'Move':
+                reviewMove(order, resolve);
+                break;
+              case 'ProduceUnit':
+                reviewProduceUnit(order, resolve);
+                break;
+              default:
+                throw 'undefined order.orderType or orderReview';
+            }
           } catch (e) {
             console.log(e.stack)
           }
@@ -309,7 +323,7 @@ class Vikings {
 
   addMoveOrder(unitId, spaceId) {
     console.log(`adding Move order: ${unitId} to ${spaceId}`);
-    //that.board.moveUnit(unitId, spaceId);
+
     that.board.addPendingOrder(unitId, {
       type: 'Move',
       params: hexkeyToPos(spaceId)
@@ -317,6 +331,20 @@ class Vikings {
     that.moving = undefined;
     that.board.view.setMovementIndicator();
     that.selectUnit(unitId);
+    that.setUnitListInfo();
+  }
+
+  addProduceUnitOrder(buildingId, classType) {
+    console.log(`adding ProduceUnit order: ${buildingId} building ${classType}`);
+
+    that.board.addPendingOrder(buildingId, {
+      type: 'ProduceUnit',
+      params: {
+        classType
+      }
+    });
+
+    that.selectUnit(buildingId);
     that.setUnitListInfo();
   }
 
@@ -348,6 +376,10 @@ class Vikings {
     that.board.view.setMovementIndicator(that.isWithinDistance(unit));
   }
 
+  produceUnitClickedCallback(buildingId, classType) {
+    that.addProduceUnitOrder(buildingId, classType);
+  }
+
   selectUnitClickedCallback(unitId) {
     if (that.moving) {
       return;
@@ -359,7 +391,7 @@ class Vikings {
     if (that.moving) {
       return;
     }
-    console.log(`cancel unit(${unitId}) order: ${orderIndex}`);
+    console.log(`cancel unit${unitId}) order: ${orderIndex}`);
     that.board.removeOrder(unitId, orderIndex);
     that.selectUnit(unitId);
     that.setUnitListInfo();

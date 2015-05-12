@@ -1,7 +1,7 @@
-var Unit = require('./Unit');
+var Building = require('./Building');
 
 var MeadHall = function (existingPiece) {
-  var that = Unit('MeadHall', existingPiece);
+  var that = Building('MeadHall', existingPiece);
   if (existingPiece) {
     return that;
   }

@@ -100,7 +100,13 @@ class BoardView {
     var pos = this.getHexPosition(x, y),
       add;
 
+    // hacky when stacking more than 3 units
+    if (spotsTaken > 2) {
+      spotsTaken = 999;
+    }
+
     add = {
+      999: {x: 9999, y: 9999},
       0: {x: 4, y: 10},
       1: {x: 20, y: 23},
       2: {x: 42, y: 10}
@@ -144,7 +150,9 @@ class BoardView {
     });
 
     if (_.isUndefined(unitIndex)) {
-      throw 'cant move unit from a space where the unit does not exist.';
+      //throw 'cant move unit from a space where the unit does not exist.';
+      // for now ignore, until the initial gamestate would reflect not having the newest turn (because turn preview will try to move units that dont exist)
+      return;
     }
 
     var $unit;

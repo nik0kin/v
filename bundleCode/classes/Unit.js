@@ -38,8 +38,16 @@ var Unit = function (className, _piece) {
     piece.ownerId = ownerId;
   };
 
+  that.getOwner = function () {
+    return piece.ownerId;
+  }
+
   that.setLocation = function (locationId) {
     piece.locationId = locationId;
+  };
+
+  that.getLocationId = function () {
+    return piece.locationId;
   };
 
   that.getLocationPos = function () {

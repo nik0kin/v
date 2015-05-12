@@ -3,7 +3,8 @@ var _ = require('lodash');
 var mUtils = require('../utils/mUtils');
 
 var OrdersMap = {
-  'Move': require('../orders/Move')
+  'Move': require('../orders/Move'),
+  'ProduceUnit': require('../orders/ProduceUnit'),
 };
 
 var progressRoundHook = function (M) {
@@ -43,8 +44,10 @@ var progressRoundHook = function (M) {
         metaData.orders.push(orderMetadata);
       }
 
-      if (orderMetadata.doNextOrder) {
+      if (orderMetadata.removeOrder || orderMetadata.doNextOrder) {
         unit.removeOrder(0);
+      }
+      if (orderMetadata.doNextOrder) {
         executeNextOrder(unit, id);
       }
       unit.save(M);

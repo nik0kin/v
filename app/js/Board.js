@@ -36,18 +36,37 @@ class Board {
   }
 
   initUnits(units) {
-    _.each(units, this.addUnit);
+    _.each(units, (unit) => {
+      this.addUnit(unit);
+    });
   }
 
   // add new units
-  addUnit(unit) {
-    if (unit.speed) {
-      that.view.placeUnit(unit.x, unit.y, unit.classType);
-    } else {
-      that.view.placeBuilding(unit.x, unit.y, unit.classType);
+  addUnit(unit, ignoreAddingToView) {
+    if (!ignoreAddingToView) {
+      if (unit.speed) {
+        that.view.placeUnit(unit.x, unit.y, unit.classType);
+      } else {
+        that.view.placeBuilding(unit.x, unit.y, unit.classType);
+      }
     }
     that.unitsById[unit.id] = unit;
     that.unitsBySpaceId[toKey(unit.x, unit.y)][unit.id] = unit;
+  }
+
+  mPieceToVikingUnit(piece) {
+    var pos = hexkeyToPos(piece.locationId);
+    return {
+      id: piece.id,
+      ownerId: piece.ownerId,
+      x: pos.x,
+      y: pos.y,
+      classType: piece.class.toLowerCase(),
+      orders: piece.attributes.orders,
+      initiative: piece.attributes.initiative,
+      currentProduction: piece.attributes.currentProduction,
+      speed: piece.attributes.speed
+    };
   }
 
   // convert existing turn to pendingTurn
@@ -63,6 +82,7 @@ class Board {
   }
 
   // called on newTurn
+  //   needs to be called on review?
   updateUnits(units) {
     _.each(units, (unit) => {
       var localUnit = this.unitsById[unit.id];
@@ -72,8 +92,11 @@ class Board {
         //localUnit.x = pos.x;
         //localUnit.y = pos.y;
         localUnit.orders = unit.attributes.orders;
+        localUnit.currentProduction = unit.attributes.currentProduction;
       } else {
         // make new unit
+        var newUnit = mPieceToVikingUnit(unit);
+        that.addUnit(newUnit, true);
       }
     });
 
@@ -146,8 +169,9 @@ class Board {
 
     var orders = {
       CancelOrder: [],
-      Move: []
-    }
+      Move: [],
+      ProduceUnit: []
+    };
 
     _.each(this.pendingTurn[unitId], (order) => {
       orders[order.type].push(order);
@@ -168,6 +192,11 @@ class Board {
     // add Move orders
     _.each(orders['Move'], (moveOrder) => {
       currentOrders.push(moveOrder);
+    });
+
+    // add ProduceUnit orders
+    _.each(orders['ProduceUnit'], (produceUnitOrder) => {
+      currentOrders.push(produceUnitOrder);
     });
 
     return currentOrders;

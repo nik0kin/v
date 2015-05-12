@@ -7,6 +7,7 @@ class UIView {
     this.$modeLabel = $('#moreinfo');
     this.submitButtonClickedCallback = params.submitButtonClickedCallback;
     this.moveUnitClickedCallback = params.moveUnitClickedCallback;
+    this.produceUnitClickedCallback = params.produceUnitClickedCallback;
     this.unitListClickedCallback = params.unitListClickedCallback;
     this.selectUnitClickedCallback = params.selectUnitClickedCallback;
     this.cancelUnitOrderClickedCallback = params.cancelUnitOrderClickedCallback;
@@ -120,17 +121,35 @@ class UIView {
     }
 
     var htmlStr = '',
-        moveButtonId = `moveunit${unit.id}`;
+        moveButtonId = `moveunit${unit.id}`,
+        produceUnitButtonId = `produceunit${unit.id}`
 
     htmlStr += `${unit.classType} id=${unit.id}<br>`;
-    htmlStr += `speed=${unit.speed}, initiative=${unit.initiative}<br>`;
+    if (unit.speed) {
+      htmlStr += `speed=${unit.speed}, `;
+    } else if (unit.currentProduction) {
+      htmlStr += `next Unit produced=${unit.currentProduction.finishTurn}, `;
+    }
+    htmlStr += `initiative=${unit.initiative}<br>`;
 
     _.each(orders, (order, key) => {
-      htmlStr += `- ${order.type} ${order.params.x},${order.params.y} `;
+      htmlStr += `- ${order.type} `;
+      switch (order.type.toLowerCase()) {
+        case 'move':
+          htmlStr += `${order.params.x},${order.params.y} `;
+          break;
+        case 'produceunit':
+          htmlStr += `${order.params.classType} `;
+          break;
+      }
       htmlStr += `<button id="cancelorder${key}">X</button><br>`;
     });
 
-    htmlStr += `<button id="${moveButtonId}">Move</button>`;
+    if (unit.speed) {
+      htmlStr += `<button id="${moveButtonId}">Move</button>`;
+    } else if (unit.classType === 'meadhall') {
+      htmlStr += `<button id="${produceUnitButtonId}">Produce Worker</button>`;
+    }
     htmlStr += '<br>';
 
     this.$selectedUnitInfo.html(htmlStr);
@@ -139,21 +158,28 @@ class UIView {
     this.$selectedUnitIcon.show();
     this.$selectedUnitIcon.prop('src', 'img/icons/' + unit.classType + '.png');
 
-    // initalize move click callback
     var that = this;
-    var moveUnitButton = $('#' + moveButtonId);
-    var moving = false;
-    moveUnitButton.click(function () {
-      if (moving) {
-        that.moveUnitClickedCallback();
-        moveUnitButton.html('Move');
-        moving = false;
-        return;
-      }
-      that.moveUnitClickedCallback(unit.id);
-      moveUnitButton.html('MOVING');
-      moving = true;
-    });
+    if (unit.speed) {
+      // initalize move click callback
+      var $moveUnitButton = $('#' + moveButtonId),
+          moving = false;
+      $moveUnitButton.click(function () {
+        if (moving) {
+          that.moveUnitClickedCallback();
+          $moveUnitButton.html('Move');
+          moving = false;
+          return;
+        }
+        that.moveUnitClickedCallback(unit.id);
+        $moveUnitButton.html('MOVING');
+        moving = true;
+      });
+    } else if (unit.classType === 'meadhall') {
+      // initalize produce unit click callback
+      $('#' + produceUnitButtonId).click(function () {
+        that.produceUnitClickedCallback(unit.id, 'worker');
+      });
+    }
 
     // initalize cancel order click callbacks
     _.each(orders, (order, key) => {
@@ -239,6 +265,19 @@ class UIView {
 
           htmlStr += `<img src="img/icons/${unit.classType}.png" class="smallIcon">`;
           htmlStr += `${unit.initiative}). ${order.unitId}-${unit.classType} moved to ${lastPos.x},${lastPos.y}`;
+          break;
+        case 'ProduceUnit':
+          var unit = getUnit(order.unitId);
+          htmlStr += `<img src="img/icons/${unit.classType}.png" class="smallIcon">`;
+          htmlStr += `${unit.initiative}). ${order.unitId}-${unit.classType}`;
+
+          if (order.start) {
+            htmlStr += ` started producing ${order.classType}`;
+          } else if (order.finish) {
+            htmlStr += ` finished producing ${order.classType}`;
+          } else {
+            htmlStr += ` continued producing ${order.classType}`;
+          }
           break;
       }
       htmlStr += '</div>';

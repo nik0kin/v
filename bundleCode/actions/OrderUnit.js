@@ -1,6 +1,7 @@
 var _ = require('lodash');
 
-var Move = require('../orders/Move');
+var Move = require('../orders/Move'),
+    ProduceUnit = require('../orders/ProduceUnit');
 
 var validateCancelOrder = function (M, unit, orderParams, actionParams) {
   var orderIndex = orderParams.orderIndex;
@@ -26,6 +27,7 @@ var validateCancelOrder = function (M, unit, orderParams, actionParams) {
 var validateOrder = {
   'CancelOrder': validateCancelOrder,
   'Move': Move.validate,
+  'ProduceUnit': ProduceUnit.validate,
 };
 
 var validateQ = function (M, actionOwnerRel, actionParams) {
@@ -54,7 +56,8 @@ exports.validateQ = validateQ;
 var doQ = function (M, actionOwnerRel, actionParams) {
   var orderParams = {
     CancelOrder: [],
-    Move: []
+    Move: [],
+    ProduceUnit: [],
   };
 
   _.each(actionParams.orders, function (order) {
@@ -75,6 +78,14 @@ var doQ = function (M, actionOwnerRel, actionParams) {
   _.each(orderParams['Move'], function (orderParams) {
     unit.attributes.orders.push({
       type: 'Move',
+      params: orderParams
+    });
+  });
+
+  // and ProduceUnits..
+  _.each(orderParams['ProduceUnit'], function (orderParams) {
+    unit.attributes.orders.push({
+      type: 'ProduceUnit',
       params: orderParams
     });
   });
