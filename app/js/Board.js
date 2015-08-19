@@ -95,7 +95,7 @@ class Board {
         localUnit.currentProduction = unit.attributes.currentProduction;
       } else {
         // make new unit
-        var newUnit = mPieceToVikingUnit(unit);
+        var newUnit = that.mPieceToVikingUnit(unit);
         that.addUnit(newUnit, true);
       }
     });
