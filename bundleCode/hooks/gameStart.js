@@ -40,6 +40,17 @@ var gameStartHook = function (M) {
     meadHall.save(M);
   });
 
+  // Give Trees resources
+  var treeSpaces = _.filter(M.getSpaces(), function (space) {
+    return space.attributes.terrainType === 'forest';
+  });
+
+  _.each(treeSpaces, function (space) {
+    space.attributes.resources = space.attributes.resources || {};
+    space.attributes.resources.wood = 25;
+    M.setSpace(space.boardSpaceId, space);
+  });
+
   return M.persistQ();
 };
 

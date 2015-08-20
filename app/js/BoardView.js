@@ -73,10 +73,10 @@ class BoardView {
 
     grid.addEvent("tileclick", function(e, x, y) {
       var axialPos = hexlibToAxial(x, y);
-      if (axialPos.x < 0 || axialPos.x >= size.width
-          || axialPos.y < 0 || axialPos.y >= size.height) {
-        return;
-      }
+      //if (axialPos.x < 0 || axialPos.x >= size.width
+      //    || axialPos.y < 0 || axialPos.y >= size.height) {
+      //  return;
+      //}
       clickSpaceCallback(axialPos);
     });
 

@@ -14,6 +14,7 @@ class UIView {
     this.$selectedSpaceInfo = $('#selectedSpaceInfo > p');
     this.$selectedSpaceIcon = $('#selectedSpaceTile');
     this.$selectedSpaceTerrainLabel = $('#selectedSpaceTerrainLabel');
+    this.$selectedSpaceResourceLabel = $('#selectedSpaceResourceLabel');
     this.$selectedSpacePositionLabel = $('#selectedSpacePositionLabel');
     this.$selectedUnitInfo = $('#selectedUnitInfo > p');
     this.$selectedUnitIcon = $('#selectedUnitInfo > img');
@@ -196,6 +197,7 @@ class UIView {
       this.$selectedSpaceIcon.hide();
       this.$selectedSpacePositionLabel.hide();
       this.$selectedSpaceTerrainLabel.hide();
+      this.$selectedSpaceResourceLabel.hide();
       return;
     }
 
@@ -220,6 +222,19 @@ class UIView {
     this.$selectedSpaceTerrainLabel.html(space.terrainType);
     this.$selectedSpacePositionLabel.show();
     this.$selectedSpaceTerrainLabel.show();
+
+    // set resources label if applicable
+    if (space.resources) {
+      var htmlStr = '';
+      _.each(space.resources, function (amount, resource) {
+        htmlStr = amount + resource.substring(0,1).toUpperCase() + ' ';
+      });
+      this.$selectedSpaceResourceLabel
+          .html(htmlStr)
+          .show();
+    } else {
+      this.$selectedSpaceResourceLabel.hide();
+    }
 
     // initilize move click callbacks
     _.each(units, function (unit) {

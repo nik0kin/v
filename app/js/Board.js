@@ -17,16 +17,18 @@ class Board {
     this.unitsBySpaceId = {};
 
     var boardSpaces = [];
-    _.each(params.gameBoard.board, function (space) {
-      var pos = hexkeyToPos(space.id);
+    _.each(params.gameState.spaces, function (space) {
+      var id = space.boardSpaceId,
+          pos = hexkeyToPos(id);
       var newSpace = {
         x: pos.x,
         y: pos.y,
-        terrainType: space.attributes.terrainType
+        terrainType: space.attributes.terrainType,
+        resources: space.attributes.resources
       };
-      that.spacesById[space.id] = newSpace
+      that.spacesById[id] = newSpace
       boardSpaces.push(newSpace);
-      that.unitsBySpaceId[space.id] = {};
+      that.unitsBySpaceId[id] = {};
     });
 
     params.boardSpaces = boardSpaces;
