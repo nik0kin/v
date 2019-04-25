@@ -9,7 +9,7 @@
   "author": "@nikpoklitar",
   "license": "ISC",
   "dependencies": {
-    "lodash": "^3.0.1",
+    "lodash": "^4.17.11",
     "pathfinding": "git+https://git@github.com/nik0kin/pathfinding.js.git#hex",
     "q": "^1.1.2",
     "weighted": "^0.2.2"
